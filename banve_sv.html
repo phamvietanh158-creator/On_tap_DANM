@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLO4 – Đọc hiểu bản vẽ móng</title>
+<style>
+  body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1b2430;line-height:1.55}
+  main{max-width:900px;margin:0 auto;padding:12px}
+  .card{background:#fff;border-radius:10px;padding:14px;margin:12px 0;box-shadow:0 1px 3px #0002}
+  h1{font-size:1.2rem} h2{font-size:1.05rem;margin:.6em 0 .3em} h3{font-size:1rem;margin:.8em 0 .2em}
+  label{display:inline-block;margin:4px 10px 4px 0} input[type=number],input[type=text]{padding:6px;font-size:1rem}
+  button{padding:9px 16px;font-size:1rem;border:0;border-radius:8px;background:#1f6feb;color:#fff;cursor:pointer}
+  .opt{display:block;padding:5px 8px;margin:3px 0;border-radius:6px;cursor:pointer} .opt:hover{background:#f0f4fa} .opt input{margin-right:8px}
+  .ok{color:#127a3d;font-weight:600} .no{color:#b42318;font-weight:600} .hint{color:#5b6773;font-size:.9rem}
+  .box{background:#eef4ff;border-left:4px solid #1f6feb;padding:8px 10px;border-radius:6px;margin:8px 0}
+  .right{background:#e7f6ec} .wrong{background:#fdecea}
+</style>
+</head>
+<body>
+<main>
+  <h1>CLO4 – Đọc hiểu bản vẽ móng</h1>
+  <div class="card">
+    <label>Số đề của bạn <input id="seed" type="number" min="1" value="1" style="width:6em"></label>
+    <button id="start">Xem bản vẽ</button>
+    <div id="idBox"><label>MSSV <input id="maSV" type="text" style="width:8em"></label>
+      <label>Họ tên <input id="hoTen" type="text" style="width:10em"></label>
+      <label>Lớp <input id="lop" type="text" style="width:7em"></label>
+      <span class="hint">(cần khi nộp lên máy chủ)</span></div>
+    <p class="hint">Mỗi số đề có bản vẽ riêng. Quan sát kỹ bản vẽ (chú thích số, kích thước, ký hiệu thép, tỉ lệ) rồi chọn đáp án. Kích thước ghi trên hình là kích thước thật của đề này.</p>
+  </div>
+  <div class="card" id="paper" style="display:none">
+    <div id="qs"></div>
+    <button id="submit">Nộp bài</button>
+    <div id="out"></div>
+  </div>
+</main>
+
+<script src="config.js"></script>
+<script src="js/whatif.js"></script>
+<script src="js/qbank.js"></script>
+<script src="js/m6-draw.js"></script>
+<script src="js/m6-quiz-public.js"></script>
+<script>
+(function(){
+  var WF = window.WhatIf, D = window.M6Draw, Q = window.M6Quiz, $ = function(i){return document.getElementById(i);};
+  var p = null, seed = 1, TITLE = {nong:'Bản vẽ 1 – Móng đơn', coc:'Bản vẽ 2 – Móng cọc'};
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function start(){
+    seed = Math.max(1, parseInt($('seed').value,10)||1); p = D.params(seed);
+    var qs = WF.describe(Q.TPL, p), h = '', n = 0;
+    ['nong','coc'].forEach(function(dr){
+      h += '<h2>'+TITLE[dr]+'</h2>' + (dr==='nong' ? D.svgNong(p) : D.svgCoc(p));
+      qs.filter(function(q){return q.draw===dr;}).forEach(function(q){
+        n++;
+        var os = window.QBank.shuffle(q.o, seed*17 + n*5);
+        h += '<div class="wq" id="wq_'+q.id+'"><h3>Câu '+n+'. '+esc(q.q)+'</h3>' +
+          os.map(function(o){return '<label class="opt" id="o_'+q.id+'_'+o.k+'"><input type="radio" name="w_'+q.id+'" value="'+o.k+'"> '+esc(o.t)+'</label>';}).join('')+'<div id="r_'+q.id+'"></div></div>';
+      });
+    });
+    $('qs').innerHTML = h; $('out').innerHTML=''; $('paper').style.display='block'; $('submit').style.display='';
+  }
+  function answers(){
+    var a = {};
+    Q.TPL.forEach(function(t){
+      var els = document.querySelectorAll('input[name="w_'+t.id+'"]'), pk = [];
+      for(var i=0;i<els.length;i++) if(els[i].checked) pk.push(els[i].value);
+      a[t.id] = pk;
+    });
+    return a;
+  }
+  function show(res){
+    res.items.forEach(function(it){
+      it.o.forEach(function(o){
+        var el = document.getElementById('o_'+it.id+'_'+o.k); if(!el) return;
+        var r = it.correct.indexOf(o.k)>=0, c = it.picked.indexOf(o.k)>=0;
+        el.className = 'opt' + (r?' right':(c?' wrong':''));
+        var inp = el.querySelector('input'); if(inp) inp.disabled = true;
+      });
+      document.getElementById('r_'+it.id).innerHTML = '<p class="'+(it.score>=1?'ok':'no')+'">'+(it.score>=1?'Đúng':'Chưa đúng')+'</p><p class="hint">'+esc(it.why)+'</p>';
+    });
+    var s = Math.round(res.sum*100)/100;
+    $('out').innerHTML = '<div class="box"><b>Kết quả đọc bản vẽ: '+s+' / '+res.n+' ('+Math.round(res.mean*100)+'%)</b></div>';
+    $('submit').style.display='none';
+  }
+  function submit(){
+    var a = answers();
+    if(Q.TPL[0].truth){ show(WF.grade(Q.TPL, p, a, p)); return; }      // bản thử: chấm tại trang
+    var cfg = window.APP_CONFIG||{}, url = cfg.WORKER_URL;
+    if(!url || /REPLACE_WITH/.test(url)){ $('out').innerHTML='<p class="no">Chưa cấu hình WORKER_URL trong config.js.</p>'; return; }
+    var sv = {maSV:$('maSV').value.trim(), hoTen:$('hoTen').value.trim(), lop:$('lop').value.trim()};
+    if(!sv.maSV||!sv.hoTen||!sv.lop){ $('out').innerHTML='<p class="no">Nhập MSSV, họ tên, lớp trước khi nộp.</p>'; return; }
+    $('out').innerHTML='<p class="hint">Đang chấm…</p>';
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      maSV:sv.maSV,hoTen:sv.hoTen,lop:sv.lop,soDe:seed,module:6,baiId:'M6-'+seed,dang:'grade_m6',buoc:1,score:0,detail:{seed:seed,answers:a}})})
+    .then(function(r){return r.json();}).then(function(g){
+      if(!g.ok){ $('out').innerHTML='<p class="no">Lỗi: '+(g.error||'không rõ')+'</p>'; return; }
+      show(g);
+    }).catch(function(e){ $('out').innerHTML='<p class="no">Không gửi được: '+e.message+'</p>'; });
+  }
+  $('start').onclick = start; $('submit').onclick = submit;
+})();
+</script>
+</body>
+</html>

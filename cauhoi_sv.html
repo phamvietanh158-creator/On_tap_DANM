@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ôn tập Đồ án Nền móng – câu hỏi chọn đáp án</title>
+<style>
+  body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1b2430;line-height:1.55}
+  main{max-width:860px;margin:0 auto;padding:12px}
+  .card{background:#fff;border-radius:10px;padding:14px;margin:12px 0;box-shadow:0 1px 3px #0002}
+  h1{font-size:1.2rem} h2{font-size:1.05rem;margin:.6em 0 .3em}
+  label{display:inline-block;margin:4px 10px 4px 0} select,input[type=text]{padding:6px;font-size:1rem}
+  button{padding:9px 16px;font-size:1rem;border:0;border-radius:8px;background:#1f6feb;color:#fff;cursor:pointer}
+  .q{border-top:1px solid #e3e7ec;padding-top:10px;margin-top:10px}
+  .opt{display:block;padding:6px 8px;margin:3px 0;border-radius:6px;cursor:pointer} .opt:hover{background:#f0f4fa}
+  .opt input{margin-right:8px}
+  .tag{display:inline-block;font-size:.78rem;background:#e8eefc;color:#274a9a;border-radius:10px;padding:1px 8px;margin-right:6px}
+  .ok{color:#127a3d;font-weight:600} .no{color:#b42318;font-weight:600} .hint{color:#5b6773;font-size:.9rem}
+  .box{background:#eef4ff;border-left:4px solid #1f6feb;padding:8px 10px;border-radius:6px;margin:8px 0}
+  .right{background:#e7f6ec} .wrong{background:#fdecea}
+  table{border-collapse:collapse;width:100%;font-size:.92rem} td,th{border-bottom:1px solid #e3e7ec;padding:5px 6px;text-align:left}
+</style>
+</head>
+<body>
+<main>
+  <h1>Ôn tập Đồ án Nền móng – câu hỏi chọn đáp án</h1>
+  <div class="card">
+    <label>CLO <select id="fClo"><option value="">Tất cả</option><option value="1">CLO1 – phương án móng</option><option value="2">CLO2 – móng nông</option><option value="3">CLO3 – móng cọc</option></select></label>
+    <label>Chủ đề <select id="fTp"></select></label>
+    <label>Số câu <select id="fN"><option>10</option><option selected>20</option><option>30</option><option>40</option></select></label>
+    <label>Mã đề (hạt giống) <input id="seed" type="text" style="width:6em"></label>
+    <button id="start">Bắt đầu</button>
+    <div id="idBox" style="margin-top:6px"><label>MSSV <input id="maSV" type="text" style="width:8em"></label>
+      <label>Họ tên <input id="hoTen" type="text" style="width:10em"></label>
+      <label>Lớp <input id="lop" type="text" style="width:7em"></label>
+      <span class="hint">(cần khi nộp lên máy chủ)</span></div>
+    <p class="hint" id="bankInfo"></p>
+  </div>
+  <div class="card" id="paper" style="display:none">
+    <div id="qs"></div>
+    <button id="submit">Nộp bài</button>
+    <div id="out"></div>
+  </div>
+</main>
+
+<script src="config.js"></script>
+<script src="data/qbank_public.js"></script>
+<script src="js/qbank.js"></script>
+<script>
+(function(){
+  var FULL = window.QBANK_FULL, BANK = window.QBANK_FULL || window.QBANK, QB = window.QBank, $ = function(i){return document.getElementById(i);};
+  var cur = [], seed = 1, shown = {};
+  function f(x,n){return Number(x).toFixed(n);}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+  var tps = []; BANK.forEach(function(q){ if(tps.indexOf(q.tp)<0) tps.push(q.tp); });
+  $('fTp').innerHTML = '<option value="">Tất cả chủ đề</option>' + tps.map(function(t){return '<option>'+esc(t)+'</option>';}).join('');
+  $('bankInfo').textContent = 'Ngân hàng hiện có ' + BANK.length + ' câu (CLO1: ' + BANK.filter(function(q){return q.clo===1;}).length + ', CLO2: ' + BANK.filter(function(q){return q.clo===2;}).length + ', CLO3: ' + BANK.filter(function(q){return q.clo===3;}).length + '). Chọn một đáp án, hoặc nhiều đáp án khi đề ghi "chọn tất cả".';
+
+  function start(){
+    var sv = $('seed').value.trim(); seed = sv ? (parseInt(sv,10) || 1) : Math.floor(Math.random()*900000)+100000;
+    $('seed').value = seed;
+    cur = QB.select(BANK, {clo:$('fClo').value, tp:$('fTp').value}, +$('fN').value, seed);
+    if(!cur.length){ $('paper').style.display='none'; return; }
+    var h = '';
+    cur.forEach(function(q,i){
+      var opts = QB.shuffle(q.o, seed*31 + i*7 + 3);
+      h += '<div class="q" id="q_'+q.id+'"><div><span class="tag">'+esc(q.mod)+'</span><span class="tag">'+esc(q.tp)+'</span></div>' +
+        '<h2>Câu '+(i+1)+'. '+esc(q.q)+(q.multi?' <span class="hint">(chọn tất cả đáp án đúng)</span>':'')+'</h2>' +
+        opts.map(function(o){return '<label class="opt" id="o_'+q.id+'_'+o.k+'"><input type="'+(q.multi?'checkbox':'radio')+'" name="n_'+q.id+'" value="'+o.k+'"> '+esc(o.t)+'</label>';}).join('') +
+        '<div id="w_'+q.id+'"></div></div>';
+    });
+    $('qs').innerHTML = h; $('out').innerHTML = ''; $('paper').style.display = 'block';
+  }
+  function picks(){
+    var a = {};
+    cur.forEach(function(q){
+      var els = document.querySelectorAll('input[name="n_'+q.id+'"]'), p = [];
+      for(var i=0;i<els.length;i++) if(els[i].checked) p.push(els[i].value);
+      a[q.id] = p;
+    });
+    return a;
+  }
+  function show(res){
+    var byId = {}; cur.forEach(function(q){ byId[q.id] = q; });
+    res.items.forEach(function(it){
+      var q = byId[it.id]; if(!q) return;
+      q.o.forEach(function(o){
+        var el = document.getElementById('o_'+q.id+'_'+o.k); if(!el) return;
+        var isRight = it.correct.indexOf(o.k)>=0, chosen = it.picked.indexOf(o.k)>=0;
+        el.className = 'opt' + (isRight ? ' right' : (chosen ? ' wrong' : ''));
+        el.querySelector('input').disabled = true;
+      });
+      document.getElementById('w_'+q.id).innerHTML = '<p class="'+(it.score>=1?'ok':(it.score>0?'hint':'no'))+'">'+(it.score>=1?'Đúng':(it.score>0?'Đúng một phần ('+f(it.score,2)+')':'Chưa đúng'))+'</p><p class="hint">'+esc(it.why)+'</p>';
+    });
+    var t = res.topic, rows = Object.keys(t).map(function(k){return '<tr><td>'+esc(k)+'</td><td>'+f(t[k].s,1)+' / '+t[k].n+'</td><td>'+Math.round(100*t[k].s/t[k].n)+'%</td></tr>';}).join('');
+    $('out').innerHTML = '<div class="box"><b>Kết quả: '+f(res.sum,1)+' / '+res.n+' điểm ('+Math.round(res.mean*100)+'%)</b></div><h2>Theo chủ đề</h2><table><tr><th>Chủ đề</th><th>Điểm</th><th></th></tr>'+rows+'</table><p class="hint">Chủ đề dưới 60% nên ôn lại. Đổi "Mã đề" để làm bộ câu khác.</p>';
+    $('submit').style.display = 'none';
+  }
+  function submit(){
+    var ans = picks(), ids = cur.map(function(q){return q.id;});
+    if(FULL){ show(QB.grade(FULL, ids, ans)); return; }              // bản thử: chấm tại trang
+    var cfg = window.APP_CONFIG||{}, url = cfg.WORKER_URL;
+    if(!url || /REPLACE_WITH/.test(url)){ $('out').innerHTML='<p class="no">Chưa cấu hình WORKER_URL trong config.js.</p>'; return; }
+    var sv = {maSV:$('maSV').value.trim(), hoTen:$('hoTen').value.trim(), lop:$('lop').value.trim()};
+    if(!sv.maSV||!sv.hoTen||!sv.lop){ $('out').innerHTML='<p class="no">Nhập MSSV, họ tên, lớp trước khi nộp.</p>'; return; }
+    $('out').innerHTML='<p class="hint">Đang chấm…</p>';
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      maSV:sv.maSV,hoTen:sv.hoTen,lop:sv.lop,soDe:seed,module:7,baiId:'NH-'+seed,dang:'grade_bank',buoc:1,score:0,detail:{ids:ids,answers:ans}})})
+    .then(function(r){return r.json();}).then(function(g){
+      if(!g.ok){ $('out').innerHTML='<p class="no">Lỗi: '+(g.error||'không rõ')+'</p>'; return; }
+      show({n:g.n, sum:g.mean*g.n, mean:g.mean, items:g.items, topic:g.topic});
+    }).catch(function(e){ $('out').innerHTML='<p class="no">Không gửi được: '+e.message+'</p>'; });
+  }
+  $('start').onclick = start; $('submit').onclick = function(){ submit(); };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M4 – Móng cọc: tính, tình huống, câu hỏi (trang mẫu)</title>
+<style>
+  body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1b2430;line-height:1.5}
+  main{max-width:900px;margin:0 auto;padding:12px}
+  .card{background:#fff;border-radius:10px;padding:14px;margin:12px 0;box-shadow:0 1px 3px #0002}
+  h1{font-size:1.2rem} h2{font-size:1.05rem;margin:.8em 0 .4em} h3{font-size:1rem;margin:.8em 0 .2em}
+  label{display:inline-block;margin:4px 10px 4px 0}
+  input[type=number]{width:6em;padding:6px;font-size:1rem} input[type=text]{padding:6px;font-size:1rem}
+  button{padding:9px 16px;font-size:1rem;border:0;border-radius:8px;background:#1f6feb;color:#fff;cursor:pointer}
+  button.alt{background:#5b6773}
+  select{width:100%;padding:8px;font-size:.95rem;margin:4px 0 10px}
+  table{border-collapse:collapse;width:100%;font-size:.92rem} td,th{border-bottom:1px solid #e3e7ec;padding:5px 6px;text-align:left}
+  .ok{color:#127a3d;font-weight:600} .no{color:#b42318;font-weight:600} .hint{color:#5b6773;font-size:.9rem}
+  .box{background:#eef4ff;border-left:4px solid #1f6feb;padding:8px 10px;border-radius:6px;margin:8px 0}
+  .pass{background:#e8f6ee;border-left-color:#127a3d} .fail{background:#fdecea;border-left-color:#b42318}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:4px 14px}
+  .wq{border-top:1px solid #e3e7ec;padding-top:6px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Module 4 – Móng cọc: tính, tình huống, câu hỏi</h1>
+
+  <div class="card">
+    <h2>1. Đề bài</h2>
+    <label>Số đề (1–210) <input id="de" type="number" min="1" max="210" value="11"></label>
+    <button id="loadDe">Xem đề</button>
+    <div id="deInfo" class="hint"></div>
+    <div id="idBox"><label>MSSV <input id="maSV" type="text" style="width:8em"></label>
+      <label>Họ tên <input id="hoTen" type="text" style="width:10em"></label>
+      <label>Lớp <input id="lop" type="text" style="width:7em"></label>
+      <span class="hint">(cần khi nộp lên máy chủ)</span></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Móng cọc do hệ thống đề xuất (cọc đóng/ép, BT cọc B25, BT đài B20, thép AII)</h2>
+    <div id="dimBox"></div>
+    <p class="hint">Đây là một phương án bất kỳ, có thể đạt hoặc không đạt. Bạn tự tính rồi điền đáp số bên dưới, sau đó trả lời các câu tình huống. Chưa đủ điểm thì bấm "Làm lại với phương án mới" để có móng cọc và bộ câu hỏi khác.</p>
+    <button id="again" class="alt">Làm lại với phương án mới</button>
+  </div>
+
+  <div class="card">
+    <h2>3. Đáp số bạn tính được</h2>
+    <div class="grid" id="calcGrid"></div>
+    <h3>Kết luận từng điều kiện (theo số của bạn)</h3>
+    <div class="grid" id="verdictGrid"></div>
+    <h3>Kết luận chung</h3>
+    <select id="overall"></select>
+  </div>
+
+  <div class="card">
+    <h2>4. Câu hỏi tình huống từ móng cọc này</h2>
+    <p class="hint">Mỗi câu là một thay đổi giả định ("nếu … thì …") trên chính móng cọc ở mục 2. Câu có ghi "chọn tất cả" có thể có nhiều đáp án đúng. Đáp án và giải thích chỉ hiện sau khi nộp.</p>
+    <div id="wi"></div>
+  </div>
+
+  <div class="card">
+    <h2>5. Ba câu nối: điều kiện khống chế và lý do</h2>
+    <label><input type="checkbox" id="hintMode" checked> Bài có gợi ý (hiện sơ đồ tính)</label>
+    <div id="svgBox"></div>
+    <div id="qs"></div>
+    <button id="submit">Nộp bài</button>
+    <div id="out"></div>
+  </div>
+</main>
+
+<script src="config.js"></script>
+<script src="data/m4_de.js"></script>
+<script src="js/m4-quiz-public.js"></script>
+<script src="js/m4-calc.js"></script>
+<script src="js/m4-svg.js"></script>
+<script src="js/whatif.js"></script>
+<script src="js/whatif-gen.js"></script>
+<script src="js/m4-propose.js"></script>
+<script src="data/m4_triv.js"></script>
+<script src="js/m4-whatif-public.js"></script>
+<script>
+(function(){
+  var T = window.M4_TABLES, E = window.M4Engine, Q = window.M4Quiz, C = window.M4Calc, WI = window.M4WhatIf, WF = window.WhatIf, PR = window.M4Propose, $ = function(i){return document.getElementById(i);};
+  var PASS = (window.APP_CONFIG && window.APP_CONFIG.PASS_SCORE) || 80;
+  var SETS = ['sct','ncoc','hdai'], TITLE = {sct:'5a. Sức chịu tải [P] của cọc', ncoc:'5b. Số cọc và bố trí cọc', hdai:'5c. Chiều cao đài'};
+  var cur = null, att = 1, p = null, sel = [];
+  function f(x,n){return Number(x).toFixed(n);}
+  function nf(x){return String(x).replace('.',',');}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+  $('calcGrid').innerHTML = C.FIELDS.map(function(x){return '<label>'+x.label+' ('+x.unit+')<br><input id="c_'+x.key+'" type="number" step="any"></label>';}).join('');
+  $('verdictGrid').innerHTML = C.VERDICTS.map(function(v){return '<label>'+v.label+'<br><select id="v_'+v.key+'"><option value="">Chọn…</option><option value="dat">Đạt</option><option value="khong">Không đạt</option></select></label>';}).join('');
+  $('overall').innerHTML = '<option value="">Chọn kết luận chung…</option>' + C.OVERALL.map(function(x){return '<option value="'+x.id+'">'+x.text+'</option>';}).join('');
+
+  function loadDe(){
+    var n = Math.max(1, Math.min(210, parseInt($('de').value,10)||1));
+    cur = T.DE_MC[n-1]; att = 1;
+    $('deInfo').textContent = 'Đề ' + cur[0] + ': lớp 1 (số hiệu ' + cur[1] + ', dày ' + cur[2] + ' m), lớp 2 (' + cur[4] + ', ' + cur[5] + ' m), lớp 3 (' + cur[7] + ', ' + cur[8] + ' m), lớp 4 (' + cur[10] + ', rất dày); N0tt = ' + cur[12].toFixed(1) + ' T, M0tt = ' + cur[13].toFixed(1) + ' T·m, Q0tt = ' + cur[14].toFixed(1) + ' T; cột ' + cur[15] + ' cm.';
+    render();
+  }
+  function again(){ att = 2 + Math.floor(Math.random()*99990); render(); }
+
+  // tham số đầy đủ cho engine / sơ đồ (lấy từ phương án máy đề xuất)
+  function opts(){
+    var cb = String(cur[15]).split('x');
+    return {Lthuc:p.Lthuc, Dc:p.Dc, hm:p.hm, b:p.b, l:p.l, h:p.h, coords:p.coords,
+      lc:parseFloat(cb[0])/100, bc:parseFloat(cb[1])/100, BTcoc:'B25', BTdai:'B20', thepDai:'AII', nBars:4, dBars:16, abvCoc:3, abvDai:0.1, ma:1.55, mb:2.2,
+      layerThick:[cur[2],cur[5],cur[8],20]};
+  }
+  function render(){
+    p = PR.propose(cur, att);
+    var rows = p.coords.map(function(c,i){return (i+1)+': ('+nf(c[0])+'; '+nf(c[1])+')';}).join(' · ');
+    $('dimBox').innerHTML = 'Lần làm số <b>'+att+'</b>: cọc dài L = <b>'+p.Lthuc+'</b> m, tiết diện vuông <b>'+p.Dc+'</b> cm; đáy đài chôn hm = <b>'+nf(p.hm)+'</b> m; đài b × l × h = <b>'+nf(p.b)+' × '+nf(p.l)+' × '+nf(p.h)+'</b> m; '+p.coords.length+' cọc, tọa độ tim cọc (x; y) so với tâm đài (m): '+rows+'.';
+    C.FIELDS.forEach(function(x){ $('c_'+x.key).value=''; });
+    C.VERDICTS.forEach(function(v){ $('v_'+v.key).value=''; }); $('overall').value='';
+    var seed = cur[0]*7919 + att, qs = '';
+    SETS.forEach(function(k){ qs += '<h2>'+TITLE[k]+'</h2><p class="hint">'+Q.SETS[k].title+'</p><b>Cột A – điều kiện</b><select id="selA_'+k+'"></select><b>Cột B – lý do</b><select id="selB_'+k+'"></select>'; });
+    $('qs').innerHTML = qs;
+    SETS.forEach(function(k,n){
+      fill($('selA_'+k), Q.shuffle(Q.SETS[k].A, seed+n*101), 'Chọn điều kiện…');
+      fill($('selB_'+k), Q.shuffle(Q.SETS[k].B, seed+17+n*101), 'Chọn lý do…');
+      $('selA_'+k).onchange = svg;
+    });
+    genWi(); $('out').innerHTML=''; svg();
+  }
+  function fill(s, items, ph){ s.innerHTML = '<option value="">'+ph+'</option>' + items.map(function(x){return '<option value="'+x.id+'">'+x.text+'</option>';}).join(''); }
+  function val(k){ var v = $('c_'+k).value; return v===''?null:Number(v); }
+
+  var KEY = {T1:'tk',T2:'spt',T3:'cpt',N1:'pmax',N2:'pmin',N3:'nen',N4:'lun',D1:'cot',D2:'hang'};
+  function svg(){
+    if(!$('hintMode').checked || !p){ $('svgBox').innerHTML=''; return; }
+    var key = null; SETS.forEach(function(k){ var v = $('selA_'+k) && $('selA_'+k).value; if(v && KEY[v]) key = KEY[v]; });
+    $('svgBox').innerHTML = window.M4Svg.draw({}, opts(), key);
+  }
+
+  // ── câu hỏi tình huống ──
+  function genWi(){
+    sel = WI.select(cur[0]*131 + att*17);
+    var qs = WF.describe(sel, p), h = '';
+    qs.forEach(function(q,i){
+      var os = Q.shuffle(q.o, cur[0]*13 + att + i*7);
+      h += '<div class="wq" id="wq_'+q.id+'"><h3>Câu '+(i+1)+'. '+esc(q.q)+(q.multi?' <span class="hint">(chọn tất cả đáp án đúng)</span>':'')+'</h3>' +
+        os.map(function(x){return '<label style="display:block"><input type="'+(q.multi?'checkbox':'radio')+'" name="w_'+q.id+'" value="'+x.k+'"> '+esc(x.t)+'</label>';}).join('')+'</div>';
+    });
+    $('wi').innerHTML = h;
+  }
+  function wiAnswers(){
+    var a = {};
+    sel.forEach(function(t){
+      var els = document.querySelectorAll('input[name="w_'+t.id+'"]'), r = [];
+      for(var i=0;i<els.length;i++) if(els[i].checked) r.push(els[i].value);
+      a[t.id] = r;
+    });
+    return a;
+  }
+
+  // ── hiển thị kết quả chấm ──
+  function labOf(s){return s===1?'Đúng cả hai (1 điểm)':s===0.5?'Đúng điều kiện, sai lý do (0,5 điểm)':s===0.25?'Sai điều kiện nhưng lý do khớp với điều kiện bạn chọn (0,25 điểm)':'Chưa đúng (0 điểm)';}
+  function partHtml(label, x, extra){
+    var h = '<h3>'+label+'</h3><div class="box"><b>'+labOf(x.score)+'</b></div>'+extra;
+    h += '<p><b>Điều kiện khống chế:</b> '+x.right+'</p><p><b>Lý do:</b> '+x.rightB+'</p>';
+    if(x.pickA && x.pickA!==x.right) h += '<p class="hint"><b>Bạn chọn A:</b> '+x.pickA+'</p>';
+    if(x.pickB && x.pickB!==x.rightB) h += '<p class="hint"><b>Bạn chọn B:</b> '+x.pickB+'</p>';
+    return h;
+  }
+  function ratioLine(k, q){
+    var L = {sct:'P thống kê / SPT / CPT (T): '+f(q.tk,1)+' / '+f(q.spt,1)+' / '+f(q.cpt,1)+' (nhỏ nhất quyết định).',
+      ncoc:'Hệ số sử dụng: (Pmax+gc)/[P] '+f(q.pmax,2)+' · nhổ '+f(q.pmin,2)+' · nền '+f(q.nen,2)+' · lún '+f(q.lun,2)+'.',
+      hdai:'Hệ số sử dụng: cột đâm thủng '+f(q.cot,2)+' · hàng cọc đâm thủng '+f(q.hang,2)+'.'};
+    return '<p>'+L[k]+'</p>';
+  }
+  function showWi(w){
+    var sc = Math.round(w.sum*100)/100, h = '<h3>Câu hỏi tình huống: '+sc+' / '+w.n+'</h3>';
+    w.items.forEach(function(it){
+      var rows = it.o.map(function(x){ var r = it.correct.indexOf(x.k)>=0, c = it.picked.indexOf(x.k)>=0;
+        return '<li class="'+(r?'ok':(c?'no':''))+'">'+(r?'✔ ':(c?'✘ ':''))+esc(x.t)+'</li>'; }).join('');
+      h += '<p><b>'+esc(it.q)+'</b> — '+(it.score>=1?'<span class="ok">Đúng</span>':(it.score>0?'Đúng một phần':'<span class="no">Chưa đúng</span>'))+'</p><ul>'+rows+'</ul><p class="hint">'+esc(it.why)+(it.note?' <b>Số liệu:</b> '+esc(it.note):'')+'</p>';
+    });
+    return h;
+  }
+  function show(res){
+    var c = res.calc, qt = 0; SETS.forEach(function(k){ qt += res.parts[k].score; });
+    var sc = res.score100, pass = sc >= PASS;
+    var h = '<div class="box '+(pass?'pass':'fail')+'"><b>Điểm: '+sc+' / 100</b> — '+(pass?'ĐẠT, đủ điều kiện để bảo vệ phần này.':'CHƯA ĐẠT (cần ≥ '+PASS+'). Đọc phần giải thích rồi bấm "Làm lại với phương án mới".')+
+      '<br><span class="hint">Phần tính '+c.got+'/'+c.total+' ý (40%) · Tình huống '+(Math.round(res.wi.sum*100)/100)+'/'+res.wi.n+' (40%) · Câu nối '+qt+'/3 (20%)</span></div>';
+    h += '<h3>Đáp số của bạn so với đáp số tính từ móng cọc này</h3><table><tr><th>Đại lượng</th><th>Bạn điền</th><th>Đáp số</th><th></th></tr>' +
+      c.fields.map(function(x){return '<tr><td>'+x.label+'</td><td>'+(x.got===null?'—':f(x.got,2))+' '+x.unit+'</td><td>'+f(x.truth,2)+' '+x.unit+'</td><td class="'+(x.ok?'ok':'no')+'">'+(x.ok?'Đúng':'Sai')+'</td></tr>';}).join('') + '</table>';
+    h += '<h3>Kết luận</h3><table><tr><th>Điều kiện</th><th>Bạn chọn</th><th>Theo số của bạn</th><th></th></tr>' +
+      c.verdicts.map(function(v){return '<tr><td>'+v.label+'</td><td>'+(v.given===null?'—':v.given==='dat'?'Đạt':'Không đạt')+'</td><td>'+(v.expectOwn==='dat'?'Đạt':'Không đạt')+'</td><td class="'+(v.ok?'ok':'no')+'">'+(v.ok?'Khớp':'Lệch')+'</td></tr>';}).join('') + '</table>';
+    var ov = c.overall, ovText = {hoply:'Đạt và kinh tế', du:'Đạt nhưng dư cọc', khong:'Chưa đạt'};
+    h += '<p>Kết luận chung của bạn: <b>'+(ov.given?ovText[ov.given]:'—')+'</b>; đúng là <b>'+ovText[ov.truth]+'</b> ((Pmax+gc)/[P] = '+f(ov.maxRatio,2)+') — <span class="'+(ov.ok?'ok':'no')+'">'+(ov.ok?'Đúng':'Sai')+'</span>.</p>';
+    h += showWi(res.wi);
+    SETS.forEach(function(k){ h += partHtml('Câu '+TITLE[k], res.parts[k], ratioLine(k, res.ratios[k])); });
+    $('out').innerHTML = h;
+    if($('out').scrollIntoView) $('out').scrollIntoView();
+  }
+
+  function collect(){
+    var calc = {}, verdict = {}, ans = {};
+    C.FIELDS.forEach(function(x){ calc[x.key] = val(x.key); });
+    C.VERDICTS.forEach(function(v){ verdict[v.key] = $('v_'+v.key).value; });
+    SETS.forEach(function(k){ ans[k] = [$('selA_'+k).value, $('selB_'+k).value]; });
+    return {calc:calc, verdict:verdict, overall:$('overall').value, ans:ans, wi:{answers: wiAnswers()}};
+  }
+  function submit(){
+    var d = collect(), o = opts();
+    if(SETS.some(function(k){return !d.ans[k][0]||!d.ans[k][1];})){ $('out').innerHTML = '<p class="no">Hãy chọn đủ cột A và cột B cho cả ba câu nối ở mục 5.</p>'; return; }
+    if(E){                                          // bản giáo viên/thử: chấm ngay trong trang
+      var r; try { r = E.compute(T, cur, o); } catch(e){ $('out').innerHTML = '<p class="no">Không tính được: '+e.message+'</p>'; return; }
+      var res = {calc:C.grade(r, d.calc, d.verdict, d.overall), parts:{}, ratios:{}}, tot = 0;
+      SETS.forEach(function(k){
+        var x = Q.explain(r, k, d.ans[k][0], d.ans[k][1]);
+        res.parts[k] = {score:x.score,right:x.right.text,rightB:x.rightB.text,pickA:x.pickA&&x.pickA.text,pickB:x.pickB&&x.pickB.text};
+        res.ratios[k] = x.ratios; tot += x.score;
+      });
+      res.wi = WF.grade(sel, WI.makeCtx(E, T, cur, o), d.wi.answers, o);
+      res.score100 = C.combine(res.calc.score, tot/3, res.wi.mean);
+      show(res); return;
+    }
+    var cfg = window.APP_CONFIG||{}, url = cfg.WORKER_URL;     // bản sinh viên: chấm ở máy chủ
+    if(!url || /REPLACE_WITH/.test(url)){ $('out').innerHTML='<p class="no">Chưa cấu hình WORKER_URL trong config.js.</p>'; return; }
+    var sv = {maSV:$('maSV').value.trim(), hoTen:$('hoTen').value.trim(), lop:$('lop').value.trim()};
+    if(!sv.maSV||!sv.hoTen||!sv.lop){ $('out').innerHTML='<p class="no">Nhập MSSV, họ tên, lớp trước khi nộp.</p>'; return; }
+    $('out').innerHTML='<p class="hint">Đang chấm…</p>';
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      maSV:sv.maSV,hoTen:sv.hoTen,lop:sv.lop,soDe:cur[0],module:4,baiId:'M4-'+cur[0],dang:'grade_m4',buoc:1,score:0,
+      detail:{soDe:cur[0],attempt:att,calc:d.calc,verdict:d.verdict,overall:d.overall,ans:d.ans,wi:d.wi}})})
+    .then(function(r){return r.json();}).then(function(g){
+      if(!g.ok){ $('out').innerHTML='<p class="no">Lỗi: '+(g.error||'không rõ')+'</p>'; return; }
+      g.score100 = g.score100 !== undefined ? g.score100 : g.score;
+      show(g);
+    }).catch(function(e){ $('out').innerHTML='<p class="no">Không gửi được: '+e.message+'</p>'; });
+  }
+  C.FIELDS.forEach(function(x){ $('c_'+x.key).onchange = svg; });
+  $('hintMode').onchange = svg;
+  $('loadDe').onclick = loadDe; $('submit').onclick = submit; $('again').onclick = again;
+  loadDe();
+})();
+</script>
+</body>
+</html>
