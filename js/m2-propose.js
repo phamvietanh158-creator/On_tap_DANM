@@ -10,13 +10,18 @@
   function propose(de, attempt) {
     var r = G.rng((Number(de[0]) * 7919 + Number(attempt) * 104729) >>> 0);
     var Ntc = Number(de[11]) / 1.15;                             // tải tiêu chuẩn (T)
-    var p0 = 10 + r() * 20;                                      // áp lực trung bình mục tiêu 10–30 T/m²
+    var p0 = 6 + r() * 12;                                       // áp lực trung bình mục tiêu 6–18 T/m²
     var ratio = 1 + Math.floor(r() * 7) / 10;                    // l/b = 1,0 … 1,6
     var b = Math.max(1.2, r1(Math.sqrt(Ntc / p0 / ratio)));
     var l = Math.max(b, r1(b * ratio));
-    var hm = r1(1 + Math.floor(r() * 16) / 10);                  // 1,0 … 2,5
+    var h1 = Number(de[3]);                                      // bề dày lớp 1: đáy móng phải nằm trong lớp 1 (bảng lún chia phân tố theo lớp 1 ÷ 4, lớp 2 ÷ 8)
+    var hmax = r1(Math.min(2.5, h1 - 0.3)), hmin = Math.min(1.0, hmax);
+    var hm = r1(Math.max(0.5, hmin) + Math.floor(r() * (Math.round((hmax - Math.max(0.5, hmin)) * 10) + 1)) / 10);
     var h = Math.round((0.4 + Math.floor(r() * 11) * 0.05) * 100) / 100;   // 0,40 … 0,90
-    return { hm: hm, b: b, l: l, h: h };
+    var el = 3 + Math.floor(r() * 12);                           // phân tố sinh viên tính chi tiết (3…14: lớp 1 và lớp 2)
+    // giá trị dùng trong câu tình huống (không vượt qua đáy lớp 1)
+    var hmU = r1(Math.min(hm + 0.5, h1 - 0.1)), hmUU = r1(Math.min(hm + 1, h1 - 0.1)), hmD = r1(Math.max(0.5, hm - 0.3));
+    return { hm: hm, b: b, l: l, h: h, el: el, hmU: hmU, hmUU: hmUU, hmD: hmD };
   }
   return { propose: propose };
 });

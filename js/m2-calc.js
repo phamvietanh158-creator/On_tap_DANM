@@ -13,7 +13,13 @@
     { key: 'pmax', label: 'pmax',                                  unit: 'T/m²' },
     { key: 'pmin', label: 'pmin',                                  unit: 'T/m²' },
     { key: 'pgl',  label: 'pgl (áp lực gây lún)',                  unit: 'T/m²' },
-    { key: 'S',    label: 'Độ lún S',                              unit: 'cm' },
+    { key: 'elh',  label: 'Phân tố xét: chiều dày hi',             unit: 'm' },
+    { key: 'elz',  label: 'Phân tố xét: độ sâu đáy phân tố z kể từ đáy móng', unit: 'm' },
+    { key: 'elk0', label: 'Phân tố xét: hệ số K0 (tra theo z/b và l/b)', unit: '' },
+    { key: 'elsbt', label: 'Phân tố xét: ứng suất bản thân σbt (tại giữa phân tố)', unit: 'T/m²' },
+    { key: 'elsgl', label: 'Phân tố xét: ứng suất gây lún σgl = pgl·K0', unit: 'T/m²' },
+    { key: 'elSi', label: 'Phân tố xét: độ lún riêng của phân tố Si',  unit: 'cm' },
+    { key: 'S',    label: 'Độ lún S (tổng các phân tố)',            unit: 'cm' },
     { key: 'Pdt',  label: 'Pđt (lực đâm thủng)',                   unit: 'T' },
     { key: 'Pcdt', label: 'Pcđt (khả năng chống đâm thủng)',       unit: 'T' },
     { key: 'As',   label: 'As cạnh dài',                           unit: 'cm²' }
@@ -36,11 +42,13 @@
   // r: kết quả engine tính từ kích thước của sinh viên; calc: {key: số}; verdict: {key: 'dat'|'khong'}; overall: id
   function grade(r, calc, verdict, overall) {
     var num = function (k) { var v = calc && calc[k]; return (v === '' || v === null || v === undefined) ? NaN : Number(v); };
-    var truth = { P: r.P, ptx: r.ptx, pmax: r.pmax, pmin: r.pmin, pgl: r.pgl, S: r.S * 100, Pdt: r.punch.Pdt, Pcdt: r.punch.Pcdt, As: r.thep.As_dai };
+    var er = r.elRow || r.rows[3], truth = { P: r.P, ptx: r.ptx, pmax: r.pmax, pmin: r.pmin, pgl: r.pgl, elh: er.dh, elz: er.depth - r.hm, elk0: er.k0, elsbt: er.sbt, elsgl: er.sgl, elSi: er.Si * 100, S: r.S * 100, Pdt: r.punch.Pdt, Pcdt: r.punch.Pcdt, As: r.thep.As_dai };
     var sPtx = num('ptx'), fields = [], credit = 0;
     FIELDS.forEach(function (f) {
       var got = num(f.key), t = truth[f.key], ok = false, expect = [t], rel = 0.02, abs = 0.05;
-      if (f.key === 'S') { rel = 0.04; abs = 0.15; }
+      if (f.key === 'S' || f.key === 'elSi') { rel = 0.04; abs = 0.15; }
+      if (f.key === 'elk0') { rel = 0.03; abs = 0.01; }
+      if (f.key === 'elsgl' && isFinite(num('pgl')) && isFinite(num('elk0'))) expect.push(num('pgl') * num('elk0'));   // truyền tiếp từ pgl và K0 sinh viên đã điền
       if (f.key === 'pmin') abs = 0.2;
       if (f.key === 'pmax' && isFinite(sPtx)) expect.push(sPtx + (r.pmax - r.ptx));          // truyền tiếp từ ptx của sinh viên
       if (f.key === 'pgl' && isFinite(sPtx)) expect.push(sPtx - (r.ptx - r.pgl));

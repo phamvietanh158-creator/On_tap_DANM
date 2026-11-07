@@ -48,7 +48,7 @@
   </div>
 
   <div class="card">
-    <h2 data-n="5">Hai câu nối: điều kiện khống chế và lý do</h2>
+    <h2 data-n="5">Ba câu nối: điều kiện khống chế và lý do</h2>
     <label><input type="checkbox" id="hintMode" checked> Bài có gợi ý (hiện sơ đồ tính theo số của bạn)</label>
     <div id="svgBox"></div>
     <div id="qs"></div>
@@ -72,14 +72,14 @@
 (function(){
   var T = window.M2_TABLES, E = window.M2Engine, Q = window.M2Quiz, C = window.M2Calc, WI = window.M2WhatIf, WF = window.WhatIf, PR = window.M2Propose, $ = function(i){return document.getElementById(i);};
   var PASS = (window.APP_CONFIG && window.APP_CONFIG.PASS_SCORE) || 80;
-  var SETS = ['bl','h'], TITLE = {bl:'5a. Kích thước đáy móng b×l bị khống chế bởi điều kiện nào?', h:'5b. Chiều cao móng h được chọn theo điều kiện nào?'};
+  var SETS = ['bl','h','lun'], TITLE = {bl:'5a. Kích thước đáy móng b×l bị khống chế bởi điều kiện nào?', h:'5b. Chiều cao móng h được chọn theo điều kiện nào?', lun:'5c. Lớp đất nào đóng góp độ lún lớn nhất, vì sao?'};
   var cur = null, att = 1, o = null, sel = [];
   function f(x,n){return Number(x).toFixed(n);}
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
   function nf(x){return String(x).replace('.',',');}
 
   // ── dựng form ──
-  $('calcGrid').innerHTML = C.FIELDS.map(function(x){return '<label>'+x.label+' ('+x.unit+')<br><input id="c_'+x.key+'" type="number" step="any"></label>';}).join('');
+  $('calcGrid').innerHTML = C.FIELDS.map(function(x){return '<label>'+x.label+(x.unit?' ('+x.unit+')':'')+'<br><input id="c_'+x.key+'" type="number" step="any"></label>';}).join('');
   $('verdictGrid').innerHTML = C.VERDICTS.map(function(v){return '<label>'+v.label+'<br><select id="v_'+v.key+'"><option value="">Chọn…</option><option value="dat">Đạt</option><option value="khong">Không đạt</option></select></label>';}).join('');
   $('overall').innerHTML = '<option value="">Chọn kết luận chung…</option>' + C.OVERALL.map(function(x){return '<option value="'+x.id+'">'+x.text+'</option>';}).join('');
 
@@ -99,7 +99,9 @@
 
   function render(){
     o = PR.propose(cur, att);
-    $('dimBox').innerHTML = 'Lần làm số <b>' + att + '</b>: hm = <b>'+nf(o.hm)+'</b> m; b = <b>'+nf(o.b)+'</b> m; l = <b>'+nf(o.l)+'</b> m; h = <b>'+nf(o.h)+'</b> m.';
+    var lay = o.el < 7 ? 1 : (o.el < 15 ? 2 : 3);
+    $('dimBox').innerHTML = 'Lần làm số <b>' + att + '</b>: hm = <b>'+nf(o.hm)+'</b> m; b = <b>'+nf(o.b)+'</b> m; l = <b>'+nf(o.l)+'</b> m; h = <b>'+nf(o.h)+'</b> m.' +
+      '<br>Phần tính lún (mục 3): chia nền dưới đáy móng thành các phân tố theo bảng tính — lớp 1 chia 4 phân tố bằng nhau, lớp 2 chia 8 phân tố bằng nhau, lớp 3 mỗi phân tố 0,5 m. <b>Bạn tính chi tiết phân tố thứ '+(o.el-2)+' (kể từ đáy móng, thuộc lớp '+lay+')</b>: σbt lấy tại giữa phân tố (cộng dồn γ·h, dùng γ′ dưới mực nước ngầm), K0 tra theo z/b và l/b với z là độ sâu đáy phân tố kể từ đáy móng, σgl = pgl·K0.';
     C.FIELDS.forEach(function(x){ $('c_'+x.key).value=''; });
     C.VERDICTS.forEach(function(v){ $('v_'+v.key).value=''; }); $('overall').value='';
     var seed = cur[0]*7919 + att, qs = '';
@@ -182,14 +184,14 @@
   function show(res){
     var c = res.calc, sc = res.score100, pass = sc >= PASS; if(typeof saveScoreLocally === 'function'){ try{ saveScoreLocally(2, 'M2-' + cur[0], sc, {}); }catch(e){} }
     var h = '<div class="box '+(pass?'pass':'fail')+'"><b>Điểm: '+sc+' / 100</b> — '+(pass?'ĐẠT, đủ điều kiện để bảo vệ phần này.':'CHƯA ĐẠT (cần ≥ '+PASS+'). Đọc phần giải thích rồi bấm "Làm lại với phương án mới".')+
-      '<br><span class="hint">Phần tính '+c.got+'/'+c.total+' ý (40%) · Tình huống '+(Math.round(res.wi.sum*100)/100)+'/'+res.wi.n+' (40%) · Câu nối '+(res.parts.bl.score+res.parts.h.score)+'/2 (20%)</span></div>';
+      '<br><span class="hint">Phần tính '+c.got+'/'+c.total+' ý (40%) · Tình huống '+(Math.round(res.wi.sum*100)/100)+'/'+res.wi.n+' (40%) · Câu nối '+(res.parts.bl.score+res.parts.h.score+res.parts.lun.score)+'/3 (20%)</span></div>';
     h += '<h3>Đáp số của bạn so với đáp số tính từ phương án này</h3><table><tr><th>Đại lượng</th><th>Bạn điền</th><th>Đáp số</th><th></th></tr>' +
       c.fields.map(function(x){return '<tr><td>'+x.label+'</td><td>'+(x.got===null?'—':f(x.got,2))+' '+x.unit+'</td><td>'+f(x.truth,2)+' '+x.unit+'</td><td class="'+(x.ok?'ok':'no')+'">'+(x.ok?'Đúng':'Sai')+'</td></tr>';}).join('') + '</table>';
     h += '<h3>Kết luận</h3><table><tr><th>Điều kiện</th><th>Bạn chọn</th><th>Theo số của bạn</th><th></th></tr>' +
       c.verdicts.map(function(v){return '<tr><td>'+v.label+'</td><td>'+(v.given===null?'—':v.given==='dat'?'Đạt':'Không đạt')+'</td><td>'+(v.expectOwn==='dat'?'Đạt':'Không đạt')+'</td><td class="'+(v.ok?'ok':'no')+'">'+(v.ok?'Khớp':'Lệch')+'</td></tr>';}).join('') + '</table>';
     var ov = c.overall, ovText = {hoply:'Đạt và hợp lý', du:'Đạt nhưng dư nhiều', khong:'Chưa đạt'};
     h += '<p>Kết luận chung của bạn: <b>'+(ov.given?ovText[ov.given]:'—')+'</b>; đúng là <b>'+ovText[ov.truth]+'</b> (hệ số sử dụng lớn nhất '+f(ov.maxRatio,2)+') — <span class="'+(ov.ok?'ok':'no')+'">'+(ov.ok?'Đúng':'Sai')+'</span>.</p>';
-    h += showWi(res.wi) + partHtml('Câu 5a – b×l', res.parts.bl) + partHtml('Câu 5b – chiều cao h', res.parts.h);
+    h += showWi(res.wi) + partHtml('Câu 5a – b×l', res.parts.bl) + partHtml('Câu 5b – chiều cao h', res.parts.h) + partHtml('Câu 5c – lớp gây lún nhiều nhất', res.parts.lun);
     $('out').innerHTML = h;
     if($('out').scrollIntoView) $('out').scrollIntoView();
   }
@@ -198,19 +200,19 @@
     var calc = {}, verdict = {};
     C.FIELDS.forEach(function(x){ calc[x.key] = val(x.key); });
     C.VERDICTS.forEach(function(v){ verdict[v.key] = $('v_'+v.key).value; });
-    var ans = {bl:[$('selA_bl').value,$('selB_bl').value], h:[$('selA_h').value,$('selB_h').value]};
+    var ans = {bl:[$('selA_bl').value,$('selB_bl').value], h:[$('selA_h').value,$('selB_h').value], lun:[$('selA_lun').value,$('selB_lun').value]};
     return {calc:calc, verdict:verdict, overall:$('overall').value, ans:ans, wi:{answers: wiAnswers()}};
   }
 
   function submit(){
     var d = collect();
-    if(!d.ans.bl[0]||!d.ans.bl[1]||!d.ans.h[0]||!d.ans.h[1]){ $('out').innerHTML = '<p class="no">Hãy chọn đủ cột A và cột B cho cả hai câu nối ở mục 5.</p>'; return; }
+    if(SETS.some(function(k){return !d.ans[k][0]||!d.ans[k][1];})){ $('out').innerHTML = '<p class="no">Hãy chọn đủ cột A và cột B cho cả ba câu nối ở mục 5.</p>'; return; }
     if(E){                                          // bản giáo viên/thử: chấm ngay trong trang
       var r = E.compute(T, cur, o), calc = C.grade(r, d.calc, d.verdict, d.overall);
-      var x1 = Q.explain(r, d.ans.bl[0], d.ans.bl[1], undefined, 'bl'), x2 = Q.explain(r, d.ans.h[0], d.ans.h[1], undefined, 'h');
+      var x1 = Q.explain(r, d.ans.bl[0], d.ans.bl[1], undefined, 'bl'), x2 = Q.explain(r, d.ans.h[0], d.ans.h[1], undefined, 'h'), x3 = Q.explain(r, d.ans.lun[0], d.ans.lun[1], undefined, 'lun');
       var m = function(x){return {score:x.score,right:x.right.text,rightB:x.rightB.text,pickA:x.pickA&&x.pickA.text,pickB:x.pickB&&x.pickB.text};};
       var wres = WF.grade(sel, WI.makeCtx(E, T, cur, o), d.wi.answers, o);
-      show({calc:calc, parts:{bl:m(x1),h:m(x2)}, wi:wres, score100: C.combine(calc.score, (x1.score+x2.score)/2, wres.mean)});
+      show({calc:calc, parts:{bl:m(x1),h:m(x2),lun:m(x3)}, wi:wres, score100: C.combine(calc.score, (x1.score+x2.score+x3.score)/3, wres.mean)});
       return;
     }
     var cfg = window.APP_CONFIG||{}, url = cfg.WORKER_URL;     // bản sinh viên: chấm ở máy chủ

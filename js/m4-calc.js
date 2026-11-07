@@ -25,6 +25,8 @@
     { key: 'Bqu',   label: 'Bqu (khối móng quy ước)',           unit: 'm' },
     { key: 'ptx',   label: 'ptx dưới mũi cọc (khối quy ước)',   unit: 'T/m²' },
     { key: 'Pnen',  label: '[P] nền dưới mũi cọc',              unit: 'T/m²' },
+    { key: 'sbtQu', label: 'σbt tại đáy khối móng quy ước',     unit: 'T/m²' },
+    { key: 'pglQu', label: 'pgl = ptx − σbt (ứng suất gây lún dưới mũi cọc)', unit: 'T/m²' },
     { key: 'S',     label: 'Độ lún S',                          unit: 'cm' }
   ];
   var VERDICTS = [
@@ -48,11 +50,12 @@
     var num = function (k) { var v = calc && calc[k]; return (v === '' || v === null || v === undefined) ? NaN : Number(v); };
     var truth = { Ptk: r.Pthongke, Pspt: r.Pspt, Pcpt: r.Pcpt, Pvl: r.Pvl, Pchon: r.Pchon, Pmax: r.Pmax, Pmin: r.Pmin, AsCoc: r.thepCoc.As,
       PdtCot: r.dai.Pdt_cot, PcdtCot: r.dai.Pcdt_cot, PdtHang: r.dai.Pdt_hang, PcdtHang: r.dai.Pcdt_hang, AsDai: r.dai.As_dai, AsNgan: r.dai.As_ngan,
-      Bqu: r.qu.Bqu, ptx: r.qu.ptx, Pnen: r.qu.Pgh, S: r.qu.S };
+      Bqu: r.qu.Bqu, ptx: r.qu.ptx, Pnen: r.qu.Pgh, sbtQu: r.qu.sbt, pglQu: r.qu.pgl, S: r.qu.S };
     var fields = [], credit = 0;
     FIELDS.forEach(function (f) {
       var got = num(f.key), t = truth[f.key], expect = [t], rel = 0.02, abs = 0.05;
       if (f.key === 'S') { rel = 0.04; abs = 0.15; }
+      if (f.key === 'pglQu' && isFinite(num('ptx')) && isFinite(num('sbtQu'))) expect.push(num('ptx') - num('sbtQu'));   // truyền tiếp từ ptx và σbt đã điền
       if (f.key === 'Pchon') {                                   // truyền tiếp từ ba giá trị sinh viên đã điền
         var a = [num('Ptk'), num('Pspt'), num('Pcpt')];
         if (a.every(isFinite)) expect.push(Math.ceil(Math.min(a[0], a[1], a[2]) - 1e-9));

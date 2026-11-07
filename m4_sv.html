@@ -78,7 +78,7 @@
   function nf(x){return String(x).replace('.',',');}
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 
-  $('calcGrid').innerHTML = C.FIELDS.map(function(x){return '<label>'+x.label+' ('+x.unit+')<br><input id="c_'+x.key+'" type="number" step="any"></label>';}).join('');
+  $('calcGrid').innerHTML = C.FIELDS.map(function(x){return '<label>'+x.label+(x.unit?' ('+x.unit+')':'')+'<br><input id="c_'+x.key+'" type="number" step="any"></label>';}).join('');
   $('verdictGrid').innerHTML = C.VERDICTS.map(function(v){return '<label>'+v.label+'<br><select id="v_'+v.key+'"><option value="">Chọn…</option><option value="dat">Đạt</option><option value="khong">Không đạt</option></select></label>';}).join('');
   $('overall').innerHTML = '<option value="">Chọn kết luận chung…</option>' + C.OVERALL.map(function(x){return '<option value="'+x.id+'">'+x.text+'</option>';}).join('');
 

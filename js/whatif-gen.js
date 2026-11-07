@@ -27,7 +27,7 @@
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   function pc(x) { return (x >= 0 ? '+' : '') + (Math.round(x * 1000) / 10).toFixed(1).replace('.', ',') + '%'; }
 
-  var QUOTA = [['D', 6], ['G', 3], ['M', 5], ['R', 3], ['C', 2], ['K', 3], ['F', 2], ['H', 2]];
+  var QUOTA = [['D', 4], ['G', 2], ['M', 5], ['R', 3], ['C', 2], ['K', 3], ['F', 2], ['H', 99]];
 
   // spec: { vars:[{id,text,why,group,ov(c)→{d,de}}], metrics:[{id,name,unit,get(r),why}], conds:[{id,name,ratio(r)}],
   //         changeMetrics:[ids], ranks:[{metric,mode,vars:[ids]}], pairMetrics:[ids], hand:[tpl...] }
