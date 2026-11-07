@@ -1,0 +1,270 @@
+/* ═══════════════════════════════════════════════════════════════════
+   quiz.css — NenMong Quiz Quiz Engine Styles
+   Màn hình làm bài, SVG Trụ địa chất, 4 Step Panels & Rubric CLO
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── QUIZ HEADER & STEP TRACKER ── */
+.quiz-top-bar {
+  background: var(--primary-dark);
+  color: #FFFFFF;
+  padding: 10px 16px 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.quiz-top-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.quiz-module-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.quiz-step-dots {
+  display: flex;
+  gap: 6px;
+}
+.step-dot {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  transition: background 0.3s ease;
+}
+.step-dot.done {
+  background: #FFFFFF;
+}
+.step-dot.active {
+  background: #FFD54F;
+  box-shadow: 0 0 8px rgba(255, 213, 79, 0.6);
+}
+.step-tracker-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+/* ── QUIZ MAIN LAYOUT ── */
+.quiz-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 60px;
+}
+@media (min-width: 860px) {
+  .quiz-layout {
+    grid-template-columns: 310px 1fr;
+    align-items: start;
+  }
+  .quiz-sidebar {
+    position: sticky;
+    top: 76px;
+  }
+}
+
+/* ── SVG SOIL PROFILE CONTAINER ── */
+.soil-profile-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+.soil-profile-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.svg-soil-container {
+  width: 100%;
+  overflow: visible;
+  background: #FAFCFE;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+/* ── STEP PANELS ── */
+.step-panel {
+  display: none;
+}
+.step-panel.active {
+  display: block;
+}
+
+/* ── STEP 1: LAYER ROWS ── */
+.layer-card-item {
+  background: #FAFCFE;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+.layer-card-item.correct {
+  border-color: var(--success);
+  background: var(--success-light);
+}
+.layer-card-item.wrong {
+  border-color: var(--danger);
+  background: var(--danger-light);
+}
+.layer-card-item.partial {
+  border-color: var(--warning);
+  background: var(--warning-light);
+}
+.layer-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.layer-item-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.layer-item-props {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-light);
+}
+.layer-select-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ── STEP 2: RADIO BUTTONS ── */
+.radio-group-box {
+  display: flex;
+  gap: 10px;
+  margin: 6px 0;
+}
+.radio-btn-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #FFFFFF;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.radio-btn-label:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+.radio-btn-label input[type="radio"] {
+  accent-color: var(--primary);
+}
+.radio-btn-label:has(input[type="radio"]:checked) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+/* ── STEP 4: CLO OPEN-ENDED & RUBRIC ── */
+.clo-question-box {
+  background: #F4F8FD;
+  border-left: 4px solid var(--primary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.sub-question-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.sub-q-label {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--primary-dark);
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* ── RUBRIC EVALUATION ── */
+.rubric-card {
+  background: #FFFDE7;
+  border: 1.5px solid #FFE082;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-top: 14px;
+  font-size: 12.5px;
+}
+.rubric-title {
+  font-weight: 700;
+  color: #795548;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rubric-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.rubric-table th, .rubric-table td {
+  padding: 6px 8px;
+  border: 1px solid #FFE082;
+  font-size: 12px;
+  text-align: left;
+}
+.rubric-table th {
+  background: #FFF8E1;
+  font-weight: 700;
+}
+
+/* ── REFERENCE CHART DRAWER / SIDEBAR ── */
+.chart-ref-box {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-top: 12px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #37474F;
+}
+.chart-ref-box summary {
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--primary);
+  outline: none;
+}
+.chart-tree {
+  font-family: var(--font-mono);
+  margin-top: 8px;
+  padding-left: 4px;
+}
+
+/* ── BOTTOM QUIZ ACTIONS ── */
+.quiz-bottom-nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}

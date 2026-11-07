@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kết Quả Đánh Giá — NenMong Quiz</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/quiz.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand-group">
+        <div class="brand-logo">
+          <img src="assets/huce-logo.png" alt="HUCE Logo">
+        </div>
+        <div class="brand-titles">
+          <span class="brand-title">ĐẠI HỌC XÂY DỰNG HÀ NỘI</span>
+          <span class="brand-sub">Bộ môn Cơ học đất – Nền móng · Bảng điểm kết quả</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-ghost-white btn-sm">
+          🏠 Dashboard
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast"></div>
+
+  <main class="container" style="max-width:760px;margin-top:24px;padding-bottom:60px">
+    
+    <div class="card" style="text-align:center;padding:28px 20px">
+      <div style="font-size:44px;margin-bottom:10px">📊</div>
+      <h1 style="font-size:22px;color:var(--primary-dark);margin-bottom:6px" id="res-title">KẾT QUẢ BÀI ÔN TẬP</h1>
+      <div id="res-student-info" class="text-muted" style="font-size:13px;margin-bottom:16px"></div>
+
+      <div style="background:linear-gradient(135deg,var(--primary-light),#FFFFFF);border:2px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;display:inline-block;min-width:240px">
+        <div style="font-size:48px;font-weight:800;color:var(--primary-dark);line-height:1" id="res-total-score">0</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px">trên 100 điểm</div>
+      </div>
+
+      <div id="res-verdict-box" style="margin-bottom:20px"></div>
+
+      <div class="card" style="text-align:left;background:#FAFCFF;margin-bottom:20px">
+        <div class="card-title">📝 Bảng Chi Tiết Từng Bước Làm Bài</div>
+        <table class="rubric-table" style="margin-top:10px">
+          <thead>
+            <tr>
+              <th>Bước</th>
+              <th>Nội dung đánh giá</th>
+              <th>Điểm đạt</th>
+              <th>Tối đa</th>
+            </tr>
+          </thead>
+          <tbody id="res-table-body">
+            <tr>
+              <td><b>Bước 1</b></td>
+              <td>Xác định tên đất &amp; trạng thái</td>
+              <td id="res-s1">—</td>
+              <td>30đ</td>
+            </tr>
+            <tr>
+              <td><b>Bước 2</b></td>
+              <td>Đánh giá chất lượng lớp đất (Tốt / Xấu)</td>
+              <td id="res-s2">—</td>
+              <td>10đ</td>
+            </tr>
+            <tr>
+              <td><b>Bước 3</b></td>
+              <td>Xác định sơ đồ địa tầng tổng thể</td>
+              <td id="res-s3">—</td>
+              <td>10đ</td>
+            </tr>
+            <tr>
+              <td><b>Bước 4</b></td>
+              <td>Quyết định giải pháp móng &amp; Phân tích CLO</td>
+              <td id="res-s4">—</td>
+              <td>50đ</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a href="quiz.html?mod=1" class="btn btn-primary" style="flex:1">
+          ▶ Luyện tập tiếp bài khác
+        </a>
+        <a href="index.html" class="btn btn-outline" style="flex:1">
+          🏠 Về Bảng Điều Khiển
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- JS Dependencies -->
+  <script src="config.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const student = getStudent();
+      if (!student) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const qId = getUrlParam('q');
+      const score = parseInt(getUrlParam('score')) || 0;
+      const passScore = (window.APP_CONFIG && window.APP_CONFIG.PASS_SCORE) || 80;
+      const isPass = score >= passScore;
+
+      document.getElementById('res-student-info').textContent = 
+        `Sinh viên: ${student.hoTen} · MSSV: ${student.maSV} · Lớp: ${student.lop}${student.soDe ? ` · Số đề: ${student.soDe}` : ''}`;
+
+      document.getElementById('res-total-score').textContent = score;
+
+      const verdictEl = document.getElementById('res-verdict-box');
+      if (isPass) {
+        verdictEl.innerHTML = `
+          <div class="badge badge-pass" style="font-size:15px;padding:8px 18px">
+            🎉 ĐẠT CHUẨN ĐẦU RA BẢO VỆ ĐỒ ÁN (≥ ${passScore}đ)
+          </div>
+        `;
+      } else {
+        verdictEl.innerHTML = `
+          <div class="badge badge-fail" style="font-size:15px;padding:8px 18px">
+            ⚠️ CHƯA ĐẠT ĐIỀU KIỆN BẢO VỆ (Cần đạt tối thiểu ${passScore}đ)
+          </div>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

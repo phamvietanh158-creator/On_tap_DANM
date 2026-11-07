@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Làm Bài Tập — NenMong Quiz (ĐH Xây dựng Hà Nội)</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/quiz.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand-group">
+        <div class="brand-logo">
+          <img src="assets/huce-logo.png" alt="HUCE Logo">
+        </div>
+        <div class="brand-titles">
+          <span class="brand-title">ĐẠI HỌC XÂY DỰNG HÀ NỘI</span>
+          <span class="brand-sub">Bộ môn Cơ học đất – Nền móng · NenMong Quiz</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-ghost-white btn-sm" title="Về Dashboard">
+          🏠 Dashboard
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- STEP TRACKER TOP BAR -->
+  <div class="quiz-top-bar">
+    <div class="container">
+      <div class="quiz-top-info">
+        <div style="font-weight:700;font-size:15px" id="quiz-title">Bài tập Phương án Móng</div>
+        <span class="quiz-module-badge" id="quiz-type-badge">Dạng Thuận</span>
+      </div>
+      <div class="quiz-step-dots">
+        <div class="step-dot active" id="step-dot-1"></div>
+        <div class="step-dot" id="step-dot-2"></div>
+        <div class="step-dot" id="step-dot-3"></div>
+        <div class="step-dot" id="step-dot-4"></div>
+      </div>
+      <div class="step-tracker-label" id="step-tracker-text">
+        Bước 1: Xác định tên đất &amp; trạng thái từng lớp
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast"></div>
+
+  <!-- MAIN QUIZ LAYOUT -->
+  <main class="container quiz-layout">
+
+    <!-- LEFT SIDEBAR: SVG SOIL PROFILE & REFERENCE -->
+    <aside class="quiz-sidebar">
+      <div class="soil-profile-card">
+        <div class="soil-profile-title">
+          <span>🗺️ Trụ Địa Chất Khảo Sát</span>
+          <span class="badge badge-primary">4 Lớp Đất</span>
+        </div>
+
+        <svg id="soil-svg" class="svg-soil-container" viewBox="0 0 260 360" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Pattern Sét: Gạch chéo dày -->
+            <pattern id="pat-set" patternUnits="userSpaceOnUse" width="8" height="8">
+              <rect width="8" height="8" fill="#C4A882"/>
+              <line x1="0" y1="8" x2="8" y2="0" stroke="#8D6E63" stroke-width="1.2"/>
+            </pattern>
+            <!-- Pattern Sét pha: Gạch chéo kép -->
+            <pattern id="pat-setpha" patternUnits="userSpaceOnUse" width="8" height="8">
+              <rect width="8" height="8" fill="#D4B896"/>
+              <line x1="0" y1="8" x2="8" y2="0" stroke="#A1887F" stroke-width="1"/>
+              <line x1="0" y1="4" x2="4" y2="0" stroke="#A1887F" stroke-width="0.5"/>
+            </pattern>
+            <!-- Pattern Cát pha: Chấm thưa -->
+            <pattern id="pat-catpha" patternUnits="userSpaceOnUse" width="8" height="8">
+              <rect width="8" height="8" fill="#E8D5A0"/>
+              <circle cx="2" cy="2" r="1" fill="#C8A844"/>
+              <circle cx="6" cy="6" r="1" fill="#C8A844"/>
+            </pattern>
+            <!-- Pattern Cát: Chấm hạt cát dày -->
+            <pattern id="pat-cat" patternUnits="userSpaceOnUse" width="8" height="8">
+              <rect width="8" height="8" fill="#F5E06A"/>
+              <circle cx="2" cy="2" r="1.2" fill="#B7950B"/>
+              <circle cx="6" cy="6" r="1.2" fill="#B7950B"/>
+              <circle cx="6" cy="2" r="0.8" fill="#B7950B"/>
+              <circle cx="2" cy="6" r="0.8" fill="#B7950B"/>
+            </pattern>
+            <!-- Pattern Bùn: Lượn sóng ngang -->
+            <pattern id="pat-bun" patternUnits="userSpaceOnUse" width="12" height="8">
+              <rect width="12" height="8" fill="#A8C8E8"/>
+              <path d="M0,4 Q3,2 6,4 Q9,6 12,4" stroke="#4A90E2" fill="none" stroke-width="1.2"/>
+            </pattern>
+            <!-- Pattern Cuội sỏi: Hình tròn lớn sỏi -->
+            <pattern id="pat-cuoi" patternUnits="userSpaceOnUse" width="12" height="12">
+              <rect width="12" height="12" fill="#B0B8C0"/>
+              <ellipse cx="3" cy="3" rx="2.5" ry="2" fill="none" stroke="#607D8B" stroke-width="1.2"/>
+              <ellipse cx="9" cy="9" rx="2.5" ry="2" fill="none" stroke="#607D8B" stroke-width="1.2"/>
+            </pattern>
+          </defs>
+          <g id="svg-layers"></g>
+        </svg>
+
+        <!-- BẢNG TRA CHỈ TIÊU CƠ LÝ -->
+        <details class="chart-ref-box">
+          <summary>📖 Bảng tra phân loại đất (TCVN)</summary>
+          <div class="chart-tree">
+            <b>1. Đất Dính (A = wL - wP; B = (w-wP)/A):</b><br>
+            • A &gt; 17% → Sét<br>
+            • 7% ≤ A ≤ 17% → Sét pha<br>
+            • A &lt; 7% → Cát pha<br>
+            • B &gt; 0.5 → Dẻo chảy ❌<br>
+            • 0.25 &lt; B ≤ 0.5 → Dẻo mềm ❌<br>
+            • 0 &lt; B ≤ 0.25 → Nửa cứng ✅<br>
+            • B ≤ 0 → Cứng / Rất cứng ✅<br><br>
+            <b>2. Đất Rời (NSPT hoặc qc):</b><br>
+            • NSPT &lt; 10 (qc &lt; 4 MPa) → Rất rời / Rời ❌<br>
+            • 10 ≤ NSPT &lt; 30 (4 ≤ qc &lt; 12) → Chặt vừa ✅<br>
+            • NSPT ≥ 30 (qc ≥ 12 MPa) → Chặt / Rất chặt ✅<br><br>
+            <b>3. Bùn đất yếu:</b> NSPT &lt; 2 hoặc qc &lt; 0.5 MPa → Chảy ❌
+          </div>
+        </details>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN: 4-STEP PANELS -->
+    <section class="quiz-content">
+
+      <!-- STEP 1 PANEL -->
+      <div class="card step-panel active" id="step1-panel">
+        <div class="card-header">
+          <div class="card-title">Bước 1: Xác Định Tên Đất &amp; Trạng Thái</div>
+          <span class="badge badge-primary">Trọng số: 30đ</span>
+        </div>
+        <p class="text-muted" style="font-size:13px;margin-bottom:12px">
+          Dựa vào các chỉ tiêu cơ lý (độ ẩm tự nhiên <b>w</b>, giới hạn nhão <b>wL</b>, giới hạn dẻo <b>wP</b>, <b>NSPT</b>, <b>qc</b>), hãy phân loại tên đất và trạng thái cho từng lớp:
+        </p>
+
+        <div id="step1-layers-container"></div>
+        <div class="alert hidden" id="step1-feedback"></div>
+
+        <div class="quiz-bottom-nav">
+          <button class="btn btn-primary btn-block" id="btn-check-step1" onclick="handleCheckStep1()">
+            ✅ Kiểm Tra Bước 1
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2 PANEL -->
+      <div class="card step-panel" id="step2-panel">
+        <div class="card-header">
+          <div class="card-title">Bước 2: Đánh Giá Đất Tốt / Đất Yếu</div>
+          <span class="badge badge-primary">Trọng số: 10đ</span>
+        </div>
+        <p class="text-muted" style="font-size:13px;margin-bottom:12px">
+          Đánh giá xem từng lớp đất là lớp chịu lực TỐT (T) hay lớp đất YẾU (X) đối với giải pháp nền móng:
+        </p>
+
+        <div id="step2-layers-container"></div>
+        <div class="alert hidden" id="step2-feedback"></div>
+
+        <div class="quiz-bottom-nav">
+          <button class="btn btn-outline" onclick="navigateToStep(1)">◀ Quay lại Bước 1</button>
+          <button class="btn btn-primary" style="flex:1" id="btn-check-step2" onclick="handleCheckStep2()">
+            ✅ Kiểm Tra Bước 2
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3 PANEL -->
+      <div class="card step-panel" id="step3-panel">
+        <div class="card-header">
+          <div class="card-title">Bước 3: Xác Định Sơ Đồ Địa Tầng Tổng Thể</div>
+          <span class="badge badge-primary">Trọng số: 10đ</span>
+        </div>
+        <p class="text-muted" style="font-size:13px;margin-bottom:14px">
+          Tổng hợp kết quả đánh giá 4 lớp đất ở Bước 2 để chọn dạng địa tầng đặc trưng:
+        </p>
+
+        <div class="alert alert-warning" id="step3-pattern-suggest">
+          💡 Gợi ý sẽ hiển thị sau khi hoàn thành Bước 2.
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="sel-pattern">Chọn dạng sơ đồ địa chất 4 lớp:</label>
+          <select class="form-select font-mono" id="sel-pattern" style="font-size:15px;font-weight:700">
+            <option value="">-- Chọn sơ đồ --</option>
+            <option value="T-T-T-T">T-T-T-T (Đồng đều tốt)</option>
+            <option value="X-T-T-T">X-T-T-T (Lớp 1 yếu, các lớp dưới tốt)</option>
+            <option value="T-X-T-T">T-X-T-T (Lớp 2 yếu xen kẹp)</option>
+            <option value="X-X-T-T">X-X-T-T (2 lớp trên cùng yếu dày)</option>
+            <option value="T-T-X-T">T-T-X-T (Lớp 3 yếu nằm sâu)</option>
+            <option value="X-X-X-T">X-X-X-T (3 lớp trên rất yếu - ĐBSCL)</option>
+          </select>
+        </div>
+
+        <div class="alert hidden" id="step3-feedback"></div>
+
+        <div class="quiz-bottom-nav">
+          <button class="btn btn-outline" onclick="navigateToStep(2)">◀ Quay lại Bước 2</button>
+          <button class="btn btn-primary" style="flex:1" id="btn-check-step3" onclick="handleCheckStep3()">
+            ✅ Kiểm Tra Bước 3
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4 PANEL -->
+      <div class="card step-panel" id="step4-panel">
+        <div class="card-header">
+          <div class="card-title">Bước 4: Quyết Định Giải Pháp Nền Móng</div>
+          <span class="badge badge-primary">Trọng số: 50đ – 60đ</span>
+        </div>
+
+        <div id="step4-form-container">
+          <!-- Form render dynamically based on question type (Thuận vs CLO C4) -->
+        </div>
+
+        <div class="quiz-bottom-nav" style="margin-top:16px">
+          <button class="btn btn-outline" onclick="navigateToStep(3)">◀ Quay lại Bước 3</button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- RESULT MODAL -->
+  <div class="modal-overlay" id="result-modal">
+    <div class="modal-content" style="text-align:center">
+      <div style="font-size:38px;margin-bottom:8px">🏆</div>
+      <h2 style="font-size:20px;color:var(--primary-dark);margin-bottom:4px">KẾT QUẢ BÀI LÀM</h2>
+      <div id="modal-verdict" style="font-size:16px;font-weight:700;margin-bottom:14px"></div>
+
+      <div style="background:var(--primary-light);padding:16px;border-radius:12px;margin-bottom:16px">
+        <div style="font-size:36px;font-weight:800;color:var(--primary-dark);line-height:1" id="modal-score-num">0</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">trên thang điểm 100</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;font-size:12.5px;text-align:left">
+        <div style="background:#F8FAFC;padding:8px;border-radius:6px">Bước 1: <b id="modal-s1-pts">0đ</b></div>
+        <div style="background:#F8FAFC;padding:8px;border-radius:6px">Bước 2: <b id="modal-s2-pts">0đ</b></div>
+        <div style="background:#F8FAFC;padding:8px;border-radius:6px">Bước 3: <b id="modal-s3-pts">0đ</b></div>
+        <div style="background:#F8FAFC;padding:8px;border-radius:6px">Bước 4: <b id="modal-s4-pts">0đ</b></div>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <a href="index.html" class="btn btn-outline" style="flex:1">🏠 Dashboard</a>
+        <button class="btn btn-primary" style="flex:1" onclick="location.reload()">🔄 Bài tiếp theo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Dependencies -->
+  <script src="config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/submit.js"></script>
+  <script src="data/module1.js"></script>
+  <script src="js/quiz-engine.js"></script>
+
+  <!-- Auto-load question based on URL param -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const student = getStudent();
+      if (!student || !student.maSV) {
+        alert('Vui lòng đăng nhập trước khi làm bài tập!');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const modId = parseInt(getUrlParam('mod')) || 1;
+      const typeParam = getUrlParam('type') ? parseInt(getUrlParam('type')) : null;
+      const qId = getUrlParam('q');
+
+      let question = null;
+      if (modId === 1 && window.MODULE1_DATA) {
+        if (qId) {
+          question = window.MODULE1_DATA.find(q => q.id === qId);
+        }
+        if (!question) {
+          question = pickQuestion(window.MODULE1_DATA, 1, typeParam);
+        }
+      }
+
+      if (question) {
+        initQuiz(question);
+      } else {
+        alert('Module này đang chuẩn bị dữ liệu bài tập!');
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>
