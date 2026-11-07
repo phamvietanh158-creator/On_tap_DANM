@@ -4,49 +4,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>M4 – Móng cọc: tính, tình huống, câu hỏi (trang mẫu)</title>
-<style>
-  body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1b2430;line-height:1.5}
-  main{max-width:900px;margin:0 auto;padding:12px}
-  .card{background:#fff;border-radius:10px;padding:14px;margin:12px 0;box-shadow:0 1px 3px #0002}
-  h1{font-size:1.2rem} h2{font-size:1.05rem;margin:.8em 0 .4em} h3{font-size:1rem;margin:.8em 0 .2em}
-  label{display:inline-block;margin:4px 10px 4px 0}
-  input[type=number]{width:6em;padding:6px;font-size:1rem} input[type=text]{padding:6px;font-size:1rem}
-  button{padding:9px 16px;font-size:1rem;border:0;border-radius:8px;background:#1f6feb;color:#fff;cursor:pointer}
-  button.alt{background:#5b6773}
-  select{width:100%;padding:8px;font-size:.95rem;margin:4px 0 10px}
-  table{border-collapse:collapse;width:100%;font-size:.92rem} td,th{border-bottom:1px solid #e3e7ec;padding:5px 6px;text-align:left}
-  .ok{color:#127a3d;font-weight:600} .no{color:#b42318;font-weight:600} .hint{color:#5b6773;font-size:.9rem}
-  .box{background:#eef4ff;border-left:4px solid #1f6feb;padding:8px 10px;border-radius:6px;margin:8px 0}
-  .pass{background:#e8f6ee;border-left-color:#127a3d} .fail{background:#fdecea;border-left-color:#b42318}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:4px 14px}
-  .wq{border-top:1px solid #e3e7ec;padding-top:6px}
-  .hidden{display:none}
-</style>
+<link rel="stylesheet" href="css/sv.css">
 </head>
 <body>
+<header class="top"><h1>Module 4 – Móng cọc: tính, tình huống, câu hỏi</h1><p>Trường ĐH Xây dựng Hà Nội – Ôn tập và kiểm tra Đồ án Nền móng</p></header>
 <main>
-  <h1>Module 4 – Móng cọc: tính, tình huống, câu hỏi</h1>
+  <div class="how"><b>Cách làm bài</b><ol><li>Nhập <b>số đề</b>, MSSV, họ tên, lớp (mục 1).</li><li>Đọc <b>móng cọc do hệ thống đề xuất</b> (mục 2). Mỗi sinh viên, mỗi lần làm có một phương án khác.</li><li>Tự tính bằng bảng tính hoặc bằng tay, rồi <b>điền đáp số</b> và chọn kết luận (mục 3).</li><li>Trả lời các <b>câu tình huống</b> (mục 4) và các câu nối (mục 5): chỉ cần chọn đáp án.</li><li>Bấm <b>Nộp bài</b> ở thanh dưới cùng. Từ <b>80/100</b> là đạt. Chưa đạt thì đọc giải thích rồi bấm “Làm lại với phương án mới”.</li></ol></div>
 
   <div class="card">
-    <h2>1. Đề bài</h2>
-    <label>Số đề (1–210) <input id="de" type="number" min="1" max="210" value="11"></label>
-    <button id="loadDe">Xem đề</button>
+    <h2 data-n="1">Đề bài</h2>
+    <div class="row"><label>Số đề (1–210) <input id="de" type="number" min="1" max="210" value="11"></label>
+    <button id="loadDe">Xem đề</button></div>
     <div id="deInfo" class="hint"></div>
-    <div id="idBox"><label>MSSV <input id="maSV" type="text" style="width:8em"></label>
-      <label>Họ tên <input id="hoTen" type="text" style="width:10em"></label>
-      <label>Lớp <input id="lop" type="text" style="width:7em"></label>
-      <span class="hint">(cần khi nộp lên máy chủ)</span></div>
+    <div id="idBox" class="row"><label>MSSV <input id="maSV" type="text"></label>
+      <label>Họ tên <input id="hoTen" type="text"></label>
+      <label>Lớp <input id="lop" type="text"></label>
+      </div><p class="hint">MSSV, họ tên, lớp cần để lưu điểm khi nộp bài.</p>
   </div>
 
   <div class="card">
-    <h2>2. Móng cọc do hệ thống đề xuất (cọc đóng/ép, BT cọc B25, BT đài B20, thép AII)</h2>
-    <div id="dimBox"></div>
+    <h2 data-n="2">Móng cọc do hệ thống đề xuất (cọc đóng/ép, BT cọc B25, BT đài B20, thép AII)</h2>
+    <div id="dimBox" class="dim"></div>
     <p class="hint">Đây là một phương án bất kỳ, có thể đạt hoặc không đạt. Bạn tự tính rồi điền đáp số bên dưới, sau đó trả lời các câu tình huống. Chưa đủ điểm thì bấm "Làm lại với phương án mới" để có móng cọc và bộ câu hỏi khác.</p>
     <button id="again" class="alt">Làm lại với phương án mới</button>
   </div>
 
   <div class="card">
-    <h2>3. Đáp số bạn tính được</h2>
+    <h2 data-n="3">Đáp số bạn tính được</h2>
     <div class="grid" id="calcGrid"></div>
     <h3>Kết luận từng điều kiện (theo số của bạn)</h3>
     <div class="grid" id="verdictGrid"></div>
@@ -55,20 +39,20 @@
   </div>
 
   <div class="card">
-    <h2>4. Câu hỏi tình huống từ móng cọc này</h2>
+    <h2 data-n="4">Câu hỏi tình huống từ móng cọc này</h2>
     <p class="hint">Mỗi câu là một thay đổi giả định ("nếu … thì …") trên chính móng cọc ở mục 2. Câu có ghi "chọn tất cả" có thể có nhiều đáp án đúng. Đáp án và giải thích chỉ hiện sau khi nộp.</p>
     <div id="wi"></div>
   </div>
 
   <div class="card">
-    <h2>5. Ba câu nối: điều kiện khống chế và lý do</h2>
+    <h2 data-n="5">Ba câu nối: điều kiện khống chế và lý do</h2>
     <label><input type="checkbox" id="hintMode" checked> Bài có gợi ý (hiện sơ đồ tính)</label>
     <div id="svgBox"></div>
     <div id="qs"></div>
-    <button id="submit">Nộp bài</button>
     <div id="out"></div>
   </div>
 </main>
+<div class="bar"><span id="prog"></span><button id="submit">Nộp bài</button></div>
 
 <script src="config.js"></script>
 <script src="data/m4_de.js"></script>
@@ -236,6 +220,9 @@
   C.FIELDS.forEach(function(x){ $('c_'+x.key).onchange = svg; });
   $('hintMode').onchange = svg;
   $('loadDe').onclick = loadDe; $('submit').onclick = submit; $('again').onclick = again;
+  function prog(){ var a=wiAnswers(), n=0; sel.forEach(function(t){ if(a[t.id].length) n++; }); $('prog').textContent='Đã trả lời '+n+'/'+sel.length+' câu tình huống'; }
+  if(document.addEventListener) document.addEventListener('change', prog);
+  var _gen = genWi; genWi = function(){ _gen(); prog(); };
   loadDe();
 })();
 </script>

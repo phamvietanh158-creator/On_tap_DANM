@@ -1,0 +1,48 @@
+/* Giao diện chung cho trang sinh viên (M2, M4) */
+:root{--bg:#f3f5f9;--card:#fff;--ink:#1b2430;--mut:#5b6773;--line:#e3e7ec;--pri:#1f6feb;--pri2:#e9f1ff;--ok:#127a3d;--okbg:#e8f6ee;--no:#b42318;--nobg:#fdecea}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink);line-height:1.55;font-size:16px}
+header.top{background:linear-gradient(135deg,#1f6feb,#164fb0);color:#fff;padding:18px 16px 16px}
+header.top h1{margin:0;font-size:1.35rem;font-weight:700}
+header.top p{margin:4px 0 0;opacity:.9;font-size:.95rem}
+main{max-width:860px;margin:0 auto;padding:12px 12px 90px}
+.card{background:var(--card);border-radius:14px;padding:16px;margin:14px 0;box-shadow:0 1px 4px #0f172a14}
+h1{font-size:1.3rem} h2{font-size:1.1rem;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+h2::before{content:attr(data-n);display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:50%;background:var(--pri);color:#fff;font-size:.9rem;font-weight:700}
+h2[data-n=""]::before{display:none}
+h3{font-size:1rem;margin:14px 0 6px}
+.how{background:var(--pri2);border:1px solid #c9dcff;border-radius:14px;padding:14px 16px;margin:14px 0}
+.how b{color:#164fb0}
+.how ol{margin:6px 0 0;padding-left:20px} .how li{margin:3px 0}
+label{display:inline-block;margin:4px 10px 4px 0}
+input[type=number],input[type=text],select{padding:9px 10px;font-size:1rem;border:1px solid #c5ccd6;border-radius:8px;background:#fff;color:var(--ink)}
+input[type=number]{width:100%} input[type=text]{width:100%}
+select{width:100%;margin:4px 0 10px}
+input:focus,select:focus{outline:2px solid var(--pri);outline-offset:1px;border-color:var(--pri)}
+button{padding:10px 18px;font-size:1rem;border:0;border-radius:10px;background:var(--pri);color:#fff;cursor:pointer;font-weight:600}
+button:hover{filter:brightness(1.08)} button.alt{background:#5b6773}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px;align-items:end}
+.row label{margin:0;font-size:.9rem;color:var(--mut)}
+.row label input{margin-top:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px 14px}
+.grid label{margin:0;font-size:.9rem;color:var(--mut);background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.grid label input,.grid label select{margin-top:4px;margin-bottom:0}
+.dim{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:1.02rem}
+.dim b{color:#164fb0}
+.hint{color:var(--mut);font-size:.9rem}
+.ok{color:var(--ok);font-weight:600} .no{color:var(--no);font-weight:600}
+.box{background:var(--pri2);border-left:4px solid var(--pri);padding:10px 12px;border-radius:8px;margin:10px 0}
+.pass{background:var(--okbg);border-left-color:var(--ok)} .fail{background:var(--nobg);border-left-color:var(--no)}
+table{border-collapse:collapse;width:100%;font-size:.92rem} td,th{border-bottom:1px solid var(--line);padding:6px;text-align:left}
+.wq{background:#fbfcfe;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0}
+.wq h3{margin:0 0 6px;font-size:.98rem}
+.wq label{display:flex;align-items:flex-start;gap:8px;margin:4px 0;padding:7px 9px;border-radius:8px;border:1px solid transparent;cursor:pointer}
+.wq label:hover{background:var(--pri2)}
+.wq label:has(input:checked){background:var(--pri2);border-color:#9fc2ff}
+.wq input{margin-top:4px;flex:none}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fffffff2;backdrop-filter:blur(6px);border-top:1px solid var(--line);padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:center;z-index:5}
+.bar span{color:var(--mut);font-size:.92rem}
+.bar button{padding:11px 26px}
+.hidden{display:none}
+#svgBox svg{max-width:100%;height:auto}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr 1fr}}
