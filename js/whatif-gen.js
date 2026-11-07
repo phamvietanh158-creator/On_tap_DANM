@@ -27,7 +27,7 @@
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   function pc(x) { return (x >= 0 ? '+' : '') + (Math.round(x * 1000) / 10).toFixed(1).replace('.', ',') + '%'; }
 
-  var QUOTA = [['D', 6], ['G', 3], ['P', 5], ['R', 3], ['C', 2], ['K', 3], ['F', 2], ['H', 2]];
+  var QUOTA = [['D', 6], ['G', 3], ['M', 5], ['R', 3], ['C', 2], ['K', 3], ['F', 2], ['H', 2]];
 
   // spec: { vars:[{id,text,why,group,ov(c)→{d,de}}], metrics:[{id,name,unit,get(r),why}], conds:[{id,name,ratio(r)}],
   //         changeMetrics:[ids], ranks:[{metric,mode,vars:[ids]}], pairMetrics:[ids], hand:[tpl...] }
@@ -60,17 +60,29 @@
         note: function (c) { var r1 = run(c, v); return 'Hệ số sử dụng sau thay đổi: ' + spec.conds.map(function (k) { return k.name + ' = ' + n2(k.ratio(r1)); }).join('; ') + '.'; } });
     });
 
-    // P — một điều kiện sau thay đổi còn thỏa không
-    spec.vars.forEach(function (v) {
-      spec.conds.forEach(function (k) {
-        out.push({ id: 'P.' + v.id + '.' + k.id, fam: 'P', vk: v.id, mk: k.id,
-          text: 'Giữ nguyên mọi số liệu khác, ' + v.text + '. Điều kiện «' + k.name + '» sau thay đổi:',
-          o: ['Thỏa, còn dư (hệ số sử dụng dưới 0,9)', 'Thỏa nhưng sát giới hạn (hệ số sử dụng từ 0,9 đến 1,0)', 'Không còn thỏa (hệ số sử dụng vượt 1,0)'],
-          why: 'Điều kiện thỏa khi hệ số sử dụng ≤ 1. ' + v.why,
-          truth: function (c) { var x = k.ratio(run(c, v)); return [x > 1 ? 2 : (x >= 0.9 ? 1 : 0)]; },
-          note: function (c) { return 'Hệ số sử dụng của «' + k.name + '»: ' + n2(k.ratio(c.r0)) + ' → ' + n2(k.ratio(run(c, v))) + '.'; } });
-      });
-    });
+    // M — NỐI toàn bộ điều kiện: mỗi câu là một kịch bản (một hoặc hai thay đổi), sinh viên chọn trạng thái cho TẤT CẢ điều kiện
+    var STATES = ['Thỏa, còn dư (hệ số sử dụng dưới 0,9)', 'Thỏa nhưng sát giới hạn (từ 0,9 đến 1,0)', 'Không thỏa (vượt 1,0)'];
+    function ax(v) { return v.axis || v.id; }
+    function scen(list) {                                     // list: 1 hoặc 2 thay đổi
+      var txt = list.map(function (v) { return v.text; }).join(', đồng thời ');
+      var why = list.map(function (v) { return v.why; }).join(' ');
+      var ov = function (c) { var d = {}, e = {}; list.forEach(function (v) { var o = v.ov(c); Object.keys(o.d || {}).forEach(function (k) { d[k] = o.d[k]; }); Object.keys(o.de || {}).forEach(function (k) { e[k] = o.de[k]; }); }); return { d: d, de: e }; };
+      return { txt: txt, why: why, ov: ov };
+    }
+    function pushM(list, id) {
+      var sc = scen(list);
+      out.push({ id: 'M.' + id, fam: 'M', vk: list[0].id, mk: 'M', matrix: true,
+        text: 'Giữ nguyên mọi số liệu khác, ' + sc.txt + '. Với phương án sau khi thay đổi, hãy NỐI từng điều kiện với trạng thái của nó.',
+        rows: spec.conds.map(function (k) { return k.name; }), o: STATES,
+        why: 'Điều kiện thỏa khi hệ số sử dụng ≤ 1. ' + sc.why,
+        truth: function (c) { var o = sc.ov(c), r1 = c.run(o.d, o.de); return spec.conds.map(function (k) { var x = k.ratio(r1); return x > 1 ? 2 : (x >= 0.9 ? 1 : 0); }); },
+        note: function (c) { var o = sc.ov(c), r1 = c.run(o.d, o.de); return 'Hệ số sử dụng sau thay đổi: ' + spec.conds.map(function (k) { return k.name + ' = ' + n2(k.ratio(r1)); }).join('; ') + '.'; } });
+    }
+    spec.vars.forEach(function (v) { pushM([v], v.id); });
+    spec.vars.forEach(function (va, i) { spec.vars.forEach(function (vb, j) {
+      if (j <= i || ax(va) === ax(vb)) return;
+      pushM([va, vb], va.id + '+' + vb.id);
+    }); });
 
     // R — xếp hạng bốn thay đổi (áp dụng riêng)
     (spec.ranks || []).forEach(function (rk) {

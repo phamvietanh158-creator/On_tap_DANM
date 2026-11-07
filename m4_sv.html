@@ -15,7 +15,7 @@
 
   <div class="card">
     <h2 data-n="1">Đề bài</h2>
-    <div class="row"><label>Số đề (1–210) <input id="de" type="number" min="1" max="210" value="11"></label>
+    <div class="row" id="deRow"><label>Số đề (1–210) <input id="de" type="number" min="1" max="210" value="11"></label>
     <button id="loadDe">Xem đề</button></div>
     <div id="deInfo" class="hint"></div>
     <p id="idNote" class="hint"></p>
@@ -29,7 +29,7 @@
     <h2 data-n="2">Móng cọc do hệ thống đề xuất (cọc đóng/ép, BT cọc B25, BT đài B20, thép AII)</h2>
     <div id="dimBox" class="dim"></div>
     <p class="hint">Đây là một phương án bất kỳ, có thể đạt hoặc không đạt. Bạn tự tính rồi điền đáp số bên dưới, sau đó trả lời các câu tình huống. Chưa đủ điểm thì bấm "Làm lại với phương án mới" để có móng cọc và bộ câu hỏi khác.</p>
-    <button id="again" class="alt">Làm lại với phương án mới</button>
+    <button id="again" class="alt">Làm lại (nhận phương án mới)</button>
   </div>
 
   <div class="card">
@@ -85,10 +85,11 @@
   var ST = (typeof getStudent === 'function') ? getStudent() : null, QS = (typeof location !== 'undefined' && location.search) ? location.search : '';
   if(ST){ $('maSV').value = ST.maSV||''; $('hoTen').value = ST.hoTen||''; $('lop').value = ST.lop||'';
     var dm = (QS.match(/[?&]de=(\d+)/) || String(ST.soDe||'').match(/(\d+)/)); if(dm) $('de').value = dm[1];
-    $('idBox').style.display = 'none'; $('idNote').textContent = 'Đang làm bài với tư cách ' + (ST.hoTen||'') + ' · MSSV ' + (ST.maSV||'') + ' · lớp ' + (ST.lop||'') + '.'; }
+    $('idBox').style.display = 'none'; if(dm) $('deRow').style.display = 'none'; $('idNote').textContent = 'Đang làm bài với tư cách ' + (ST.hoTen||'') + ' · MSSV ' + (ST.maSV||'') + ' · lớp ' + (ST.lop||'') + '.'; }
   else if(QS){ var dq = QS.match(/[?&]de=(\d+)/); if(dq) $('de').value = dq[1]; }
   function loadDe(){
     var n = Math.max(1, Math.min(210, parseInt($('de').value,10)||1));
+    if(ST && typeof saveStudent === 'function' && String(ST.soDe||'').indexOf(String(n)) < 0){ ST.soDe = String(n); try{ saveStudent(ST); }catch(e){} }
     cur = T.DE_MC[n-1]; att = 1;
     $('deInfo').textContent = 'Đề ' + cur[0] + ': lớp 1 (số hiệu ' + cur[1] + ', dày ' + cur[2] + ' m), lớp 2 (' + cur[4] + ', ' + cur[5] + ' m), lớp 3 (' + cur[7] + ', ' + cur[8] + ' m), lớp 4 (' + cur[10] + ', rất dày); N0tt = ' + cur[12].toFixed(1) + ' T, M0tt = ' + cur[13].toFixed(1) + ' T·m, Q0tt = ' + cur[14].toFixed(1) + ' T; cột ' + cur[15] + ' cm.';
     render();
@@ -133,15 +134,23 @@
     sel = WI.select(cur[0]*131 + att*17);
     var qs = WF.describe(sel, p), h = '';
     qs.forEach(function(q,i){
-      var os = Q.shuffle(q.o, cur[0]*13 + att + i*7);
-      h += '<div class="wq" id="wq_'+q.id+'"><h3>Câu '+(i+1)+'. '+esc(q.q)+(q.multi?' <span class="hint">(chọn tất cả đáp án đúng)</span>':'')+'</h3>' +
-        os.map(function(x){return '<label style="display:block"><input type="'+(q.multi?'checkbox':'radio')+'" name="w_'+q.id+'" value="'+x.k+'"> '+esc(x.t)+'</label>';}).join('')+'</div>';
+      var t = '<h3>Câu '+(i+1)+'. '+esc(q.q)+(q.multi?' <span class="hint">(chọn tất cả đáp án đúng)</span>':'')+(q.matrix?' <span class="hint">(nối: chọn trạng thái cho từng điều kiện)</span>':'')+'</h3>';
+      if(q.matrix){
+        t += '<table>' + q.rows.map(function(r,k){
+          return '<tr><td>'+esc(r)+'</td><td style="min-width:46%"><select id="wm_'+q.id+'_'+k+'"><option value="">Chọn trạng thái…</option>'+q.o.map(function(x){return '<option value="'+x.k+'">'+esc(x.t)+'</option>';}).join('')+'</select></td></tr>';
+        }).join('') + '</table>';
+        h += '<div class="wq" id="wq_'+q.id+'">'+t+'</div>';
+      } else {
+        var opts = Q.shuffle(q.o, cur[0]*13 + att + i*7);
+        h += '<div class="wq" id="wq_'+q.id+'">'+t+opts.map(function(x){return '<label style="display:block"><input type="'+(q.multi?'checkbox':'radio')+'" name="w_'+q.id+'" value="'+x.k+'"> '+esc(x.t)+'</label>';}).join('')+'</div>';
+      }
     });
     $('wi').innerHTML = h;
   }
   function wiAnswers(){
     var a = {};
     sel.forEach(function(t){
+      if(t.matrix){ a[t.id] = t.rows.map(function(r,k){ return $('wm_'+t.id+'_'+k).value; }); return; }
       var els = document.querySelectorAll('input[name="w_'+t.id+'"]'), r = [];
       for(var i=0;i<els.length;i++) if(els[i].checked) r.push(els[i].value);
       a[t.id] = r;
@@ -167,9 +176,16 @@
   function showWi(w){
     var sc = Math.round(w.sum*100)/100, h = '<h3>Câu hỏi tình huống: '+sc+' / '+w.n+'</h3>';
     w.items.forEach(function(it){
-      var rows = it.o.map(function(x){ var r = it.correct.indexOf(x.k)>=0, c = it.picked.indexOf(x.k)>=0;
-        return '<li class="'+(r?'ok':(c?'no':''))+'">'+(r?'✔ ':(c?'✘ ':''))+esc(x.t)+'</li>'; }).join('');
-      h += '<p><b>'+esc(it.q)+'</b> — '+(it.score>=1?'<span class="ok">Đúng</span>':(it.score>0?'Đúng một phần':'<span class="no">Chưa đúng</span>'))+'</p><ul>'+rows+'</ul><p class="hint">'+esc(it.why)+(it.note?' <b>Số liệu:</b> '+esc(it.note):'')+'</p>';
+      var body;
+      if(it.matrix){
+        var txt = function(k){ var f = it.o.filter(function(x){return x.k===k;})[0]; return f ? f.t : '—'; };
+        body = '<table><tr><th>Điều kiện</th><th>Bạn nối</th><th>Đúng là</th><th></th></tr>' + it.rows.map(function(r,k){ var ok = it.picked[k]===it.correct[k];
+          return '<tr><td>'+esc(r)+'</td><td>'+esc(txt(it.picked[k]))+'</td><td>'+esc(txt(it.correct[k]))+'</td><td class="'+(ok?'ok':'no')+'">'+(ok?'✔':'✘')+'</td></tr>'; }).join('') + '</table>';
+      } else {
+        body = '<ul>'+it.o.map(function(x){ var r = it.correct.indexOf(x.k)>=0, c = it.picked.indexOf(x.k)>=0;
+          return '<li class="'+(r?'ok':(c?'no':''))+'">'+(r?'✔ ':(c?'✘ ':''))+esc(x.t)+'</li>'; }).join('')+'</ul>';
+      }
+      h += '<p><b>'+esc(it.q)+'</b> — '+(it.score>=1?'<span class="ok">Đúng</span>':(it.score>0?'Đúng một phần ('+Math.round(it.score*100)+'%)':'<span class="no">Chưa đúng</span>'))+'</p>'+body+'<p class="hint">'+esc(it.why)+(it.note?' <b>Số liệu:</b> '+esc(it.note):'')+'</p>';
     });
     return h;
   }
@@ -229,7 +245,7 @@
   C.FIELDS.forEach(function(x){ $('c_'+x.key).onchange = svg; });
   $('hintMode').onchange = svg;
   $('loadDe').onclick = loadDe; $('submit').onclick = submit; $('again').onclick = again;
-  function prog(){ var a=wiAnswers(), n=0; sel.forEach(function(t){ if(a[t.id].length) n++; }); $('prog').textContent='Đã trả lời '+n+'/'+sel.length+' câu tình huống'; }
+  function prog(){ var a=wiAnswers(), n=0; sel.forEach(function(t){ var v=a[t.id]; if(t.matrix ? v.every(function(x){return x;}) : v.length) n++; }); $('prog').textContent='Đã trả lời '+n+'/'+sel.length+' câu tình huống'; }
   if(document.addEventListener) document.addEventListener('change', prog);
   var _gen = genWi; genWi = function(){ _gen(); prog(); };
   loadDe();

@@ -15,7 +15,7 @@
   // tpls: danh sách mẫu; trả các câu cho một bộ kích thước (không có đáp án)
   function describe(tpls, dims) {
     return tpls.map(function (t) {
-      return { id: t.id, q: fmt(t.text, dims), multi: !!t.multi, draw: t.draw, o: t.o.map(function (x, i) { return { k: KEYS[i], t: fmt(x, dims) }; }) };
+      return { id: t.id, q: fmt(t.text, dims), multi: !!t.multi, matrix: !!t.matrix, rows: t.rows ? t.rows.map(function (x) { return fmt(x, dims); }) : null, draw: t.draw, o: t.o.map(function (x, i) { return { k: KEYS[i], t: fmt(x, dims) }; }) };
     });
   }
   // ctx do module M2/M4 dựng; trả {id: [khóa đúng]}
@@ -31,11 +31,15 @@
     if (good.length === 1) return ok === 1 && bad === 0 ? 1 : 0;
     return Math.max(0, (ok - bad) / good.length);
   }
+  function scoreMatrix(good, picked) {                         // nối từng điều kiện: điểm = tỉ lệ dòng đúng
+    var ok = 0; for (var i = 0; i < good.length; i++) if (picked && picked[i] === good[i]) ok++;
+    return good.length ? ok / good.length : 0;
+  }
   function grade(tpls, ctx, answers, dims) {
     var truth = truthMap(tpls, ctx), items = [], sum = 0;
     tpls.forEach(function (t) {
-      var s = score(truth[t.id], (answers || {})[t.id]); sum += s;
-      items.push({ id: t.id, q: fmt(t.text, dims), score: s, correct: truth[t.id], picked: (answers || {})[t.id] || [], o: t.o.map(function (x, i) { return { k: KEYS[i], t: fmt(x, dims) }; }), why: t.why, note: t.note ? t.note(ctx) : '' });
+      var s = t.matrix ? scoreMatrix(truth[t.id], (answers || {})[t.id]) : score(truth[t.id], (answers || {})[t.id]); sum += s;
+      items.push({ id: t.id, q: fmt(t.text, dims), matrix: !!t.matrix, rows: t.rows ? t.rows.map(function (x) { return fmt(x, dims); }) : null, score: s, correct: truth[t.id], picked: (answers || {})[t.id] || [], o: t.o.map(function (x, i) { return { k: KEYS[i], t: fmt(x, dims) }; }), why: t.why, note: t.note ? t.note(ctx) : '' });
     });
     return { n: tpls.length, sum: sum, mean: tpls.length ? sum / tpls.length : 0, items: items };
   }
