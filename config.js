@@ -59,10 +59,10 @@ window.APP_CONFIG = {
     {
       id: 2,
       code: "M2",
-      title: "Kiểm tra móng nông (kích thước B, L)",
+      title: "Móng nông: tính và tình huống",
       clo: "CLO2",
       bloom: "C4 (Tính toán & Kiểm tra)",
-      desc: "Xác định và kiểm tra kích thước đáy móng đơn, móng băng theo điều kiện áp lực tiêu chuẩn Rtc và áp lực đáy móng.",
+      desc: "Hệ thống đề xuất một phương án móng đơn; bạn tự tính áp lực đáy móng, sức chịu tải, lún, chọc thủng, thép rồi trả lời 26 câu tình huống.",
       totalQuestions: 10,
       subTypes: [
         { name: "Móng đơn", count: 5, desc: "Xác định B, L móng đúng tâm & lệch tâm" },
@@ -74,10 +74,10 @@ window.APP_CONFIG = {
     {
       id: 3,
       code: "M3",
-      title: "Kiểm tra chiều cao móng nông",
+      title: "Chiều cao và cốt thép móng nông (làm trong Module 2)",
       clo: "CLO2",
       bloom: "C4 (Tính toán & Kiểm tra)",
-      desc: "Kiểm tra điều kiện đâm thủng ngàm cột vào bản móng, chiều cao làm việc ho và bố trí cốt thép chịu uốn.",
+      desc: "Đâm thủng, chiều cao làm việc h0 và cốt thép đã nằm trong bài Móng nông ở Module 2.",
       totalQuestions: 10,
       subTypes: [
         { name: "Đâm thủng", count: 5, desc: "Kiểm tra cường độ bê tông chống đâm thủng" },
@@ -89,10 +89,10 @@ window.APP_CONFIG = {
     {
       id: 4,
       code: "M4",
-      title: "Kiểm tra cọc (SCT & Nhóm cọc)",
+      title: "Móng cọc: tính và tình huống",
       clo: "CLO3",
       bloom: "C4 (Phân tích & Tính toán)",
-      desc: "Tính toán sức chịu tải cọc đơn theo vật liệu & đất nền (chỉ tiêu cơ lý, SPT, CPT), kiểm tra sức chịu tải nhóm cọc.",
+      desc: "Hệ thống đề xuất một móng cọc đóng/ép; bạn tự tính sức chịu tải, tải lên cọc, đài, độ lún khối quy ước rồi trả lời 26 câu tình huống.",
       totalQuestions: 10,
       subTypes: [
         { name: "Cọc đơn", count: 5, desc: "SCT theo đất nền Rcu và vật liệu Pvl" },
@@ -104,10 +104,10 @@ window.APP_CONFIG = {
     {
       id: 5,
       code: "M5",
-      title: "Kiểm tra đài cọc",
+      title: "Đài cọc (làm trong Module 4)",
       clo: "CLO3",
       bloom: "C4 (Kiểm tra & Cấu tạo)",
-      desc: "Tính toán chiều cao đài chống chọc thủng từ cột và từ cọc biên, kiểm tra cốt thép đài cọc theo momen uốn.",
+      desc: "Chọc thủng và cốt thép đài đã nằm trong bài Móng cọc ở Module 4.",
       totalQuestions: 10,
       subTypes: [
         { name: "Chọc thủng", count: 5, desc: "Chọc thủng tháp cột & cọc góc đài" },
@@ -122,7 +122,7 @@ window.APP_CONFIG = {
       title: "Đọc hiểu bản vẽ móng",
       clo: "CLO4",
       bloom: "C2 (Đọc hiểu & Cấu tạo)",
-      desc: "Đọc hiểu mặt bằng định vị cọc, mặt bằng móng, chi tiết thép đài, neo cốt thép, mối nối cọc và lớp bê tông lót.",
+      desc: "Đọc kích thước, ký hiệu, bố trí thép và tọa độ cọc trên bản vẽ móng đơn và móng cọc (tỷ trọng nhỏ).",
       totalQuestions: 10,
       subTypes: [
         { name: "Mặt bằng", count: 5, desc: "Khoảng cách tim cọc, mép đài, lưới cột" },

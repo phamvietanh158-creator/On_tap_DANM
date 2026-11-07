@@ -4,11 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>M2 – Móng nông: tính, tình huống, câu hỏi (trang mẫu)</title>
+<link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/sv.css">
 </head>
 <body>
-<header class="top"><h1>Module 2 – Móng nông: tính, tình huống, câu hỏi</h1><p>Trường ĐH Xây dựng Hà Nội – Ôn tập và kiểm tra Đồ án Nền móng</p></header>
-<main>
+<header class="app-header"><div class="container header-inner"><a href="index.html" class="brand-group"><div class="brand-logo"><img src="assets/huce-logo.png" alt="HUCE"></div><div class="brand-titles"><span class="brand-title">ĐẠI HỌC XÂY DỰNG HÀ NỘI</span><span class="brand-sub">Bộ môn Cơ học đất – Nền móng · NenMong Quiz</span></div></a><div class="header-actions"><a class="btn btn-ghost-white btn-sm" href="index.html">← Bảng điều khiển</a></div></div></header>
+<div class="pagetitle container"><h1>Module 2 – Móng nông: tính, tình huống, câu hỏi</h1><p class="hint">Trường ĐH Xây dựng Hà Nội – Ôn tập và kiểm tra Đồ án Nền móng</p></div>
+<main class="container">
   <div class="how"><b>Cách làm bài</b><ol><li>Nhập <b>số đề</b>, MSSV, họ tên, lớp (mục 1).</li><li>Đọc <b>kích thước móng do hệ thống đề xuất</b> (mục 2). Mỗi sinh viên, mỗi lần làm có một phương án khác.</li><li>Tự tính bằng bảng tính hoặc bằng tay, rồi <b>điền đáp số</b> và chọn kết luận (mục 3).</li><li>Trả lời các <b>câu tình huống</b> (mục 4) và các câu nối (mục 5): chỉ cần chọn đáp án.</li><li>Bấm <b>Nộp bài</b> ở thanh dưới cùng. Từ <b>80/100</b> là đạt. Chưa đạt thì đọc giải thích rồi bấm “Làm lại với phương án mới”.</li></ol></div>
 
   <div class="card">
@@ -16,6 +18,7 @@
     <div class="row"><label>Số đề (1–210) <input id="de" type="number" min="1" max="210" value="1"></label>
     <button id="loadDe">Xem đề</button></div>
     <div id="deInfo" class="hint"></div>
+    <p id="idNote" class="hint"></p>
     <div id="idBox" class="row"><label>MSSV <input id="maSV" type="text"></label>
       <label>Họ tên <input id="hoTen" type="text"></label>
       <label>Lớp <input id="lop" type="text"></label>
@@ -55,6 +58,7 @@
 <div class="bar"><span id="prog"></span><button id="submit">Nộp bài</button></div>
 
 <script src="config.js"></script>
+<script src="js/utils.js"></script>
 <script src="data/m2_de.js"></script>
 <script src="js/m2-quiz-public.js"></script>
 <script src="js/m2-calc.js"></script>
@@ -79,6 +83,11 @@
   $('verdictGrid').innerHTML = C.VERDICTS.map(function(v){return '<label>'+v.label+'<br><select id="v_'+v.key+'"><option value="">Chọn…</option><option value="dat">Đạt</option><option value="khong">Không đạt</option></select></label>';}).join('');
   $('overall').innerHTML = '<option value="">Chọn kết luận chung…</option>' + C.OVERALL.map(function(x){return '<option value="'+x.id+'">'+x.text+'</option>';}).join('');
 
+  var ST = (typeof getStudent === 'function') ? getStudent() : null, QS = (typeof location !== 'undefined' && location.search) ? location.search : '';
+  if(ST){ $('maSV').value = ST.maSV||''; $('hoTen').value = ST.hoTen||''; $('lop').value = ST.lop||'';
+    var dm = (QS.match(/[?&]de=(\d+)/) || String(ST.soDe||'').match(/(\d+)/)); if(dm) $('de').value = dm[1];
+    $('idBox').style.display = 'none'; $('idNote').textContent = 'Đang làm bài với tư cách ' + (ST.hoTen||'') + ' · MSSV ' + (ST.maSV||'') + ' · lớp ' + (ST.lop||'') + '.'; }
+  else if(QS){ var dq = QS.match(/[?&]de=(\d+)/); if(dq) $('de').value = dq[1]; }
   function loadDe(){
     var n = Math.max(1, Math.min(210, parseInt($('de').value,10)||1));
     cur = T.DE_MN[n-1]; att = 1;
@@ -155,7 +164,7 @@
     return h;
   }
   function show(res){
-    var c = res.calc, sc = res.score100, pass = sc >= PASS;
+    var c = res.calc, sc = res.score100, pass = sc >= PASS; if(typeof saveScoreLocally === 'function'){ try{ saveScoreLocally(2, 'M2-' + cur[0], sc, {}); }catch(e){} }
     var h = '<div class="box '+(pass?'pass':'fail')+'"><b>Điểm: '+sc+' / 100</b> — '+(pass?'ĐẠT, đủ điều kiện để bảo vệ phần này.':'CHƯA ĐẠT (cần ≥ '+PASS+'). Đọc phần giải thích rồi bấm "Làm lại với phương án mới".')+
       '<br><span class="hint">Phần tính '+c.got+'/'+c.total+' ý (40%) · Tình huống '+(Math.round(res.wi.sum*100)/100)+'/'+res.wi.n+' (40%) · Câu nối '+(res.parts.bl.score+res.parts.h.score)+'/2 (20%)</span></div>';
     h += '<h3>Đáp số của bạn so với đáp số tính từ phương án này</h3><table><tr><th>Đại lượng</th><th>Bạn điền</th><th>Đáp số</th><th></th></tr>' +

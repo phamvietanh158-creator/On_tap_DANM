@@ -1,31 +1,158 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ôn tập và kiểm tra Đồ án Nền móng</title>
-<style>
-  body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1b2430;line-height:1.55}
-  main{max-width:760px;margin:0 auto;padding:16px}
-  h1{font-size:1.3rem;margin:.4em 0} p{margin:.4em 0}
-  .card{display:block;background:#fff;border-radius:10px;padding:14px;margin:12px 0;box-shadow:0 1px 3px #0002;text-decoration:none;color:inherit}
-  .card b{color:#1f6feb;font-size:1.05rem} .hint{color:#5b6773;font-size:.92rem}
-  .tag{display:inline-block;background:#eef4ff;color:#1f6feb;border-radius:6px;padding:0 8px;font-size:.82rem;margin-left:6px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NenMong Quiz — Ôn tập & Kiểm tra Đồ án Nền móng</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
-<main>
-  <h1>Ôn tập và kiểm tra Đồ án Nền móng</h1>
-  <p class="hint">Trường Đại học Xây dựng Hà Nội – Bộ môn Cơ học đất – Nền móng. Mỗi lần làm có phương án và bộ câu hỏi khác nhau; làm lại cho tới khi đạt từ 80/100 điểm để được bảo vệ đồ án.</p>
 
-  <a class="card" href="m2_sv.html"><b>Móng nông</b><span class="tag">CLO2</span>
-    <p>Hệ thống đề xuất một phương án móng. Bạn tự tính và điền đáp số, rồi trả lời 26 câu tình huống "nếu thay đổi … thì …".</p></a>
-  <a class="card" href="m4_sv.html"><b>Móng cọc</b><span class="tag">CLO3</span>
-    <p>Hệ thống đề xuất một móng cọc đóng/ép. Bạn tự tính sức chịu tải, tải lên cọc, đài, độ lún, rồi trả lời 26 câu tình huống.</p></a>
-  <a class="card" href="cauhoi_sv.html"><b>Ngân hàng câu hỏi chọn đáp án</b><span class="tag">CLO1–3</span>
-    <p>Câu hỏi tình huống theo chủ đề, chọn CLO, chủ đề và số câu; có điểm theo chủ đề để biết chỗ còn yếu.</p></a>
-  <a class="card" href="banve_sv.html"><b>Đọc hiểu bản vẽ móng</b><span class="tag">CLO4</span>
-    <p>Đọc ký hiệu, kích thước, bố trí thép trên bản vẽ móng đơn và móng cọc. Phần này có tỷ trọng nhỏ.</p></a>
-</main>
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand-group">
+        <div class="brand-logo">
+          <img src="assets/huce-logo.png" alt="HUCE Logo">
+        </div>
+        <div class="brand-titles">
+          <span class="brand-title">ĐẠI HỌC XÂY DỰNG HÀ NỘI</span>
+          <span class="brand-sub">Bộ môn Cơ học đất – Nền móng · NenMong Quiz</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <button class="btn btn-ghost-white btn-sm" onclick="handleLogout()" title="Đăng xuất">
+          🚪 Đăng xuất
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast"></div>
+
+  <!-- MAIN CONTAINER -->
+  <main class="container" style="padding-bottom: 40px;">
+
+    <!-- 1. LOGIN SCREEN -->
+    <section id="login-section" class="hidden">
+      <div class="login-container">
+        <div class="login-card">
+          <div class="login-header">
+            <div class="login-header-logo">
+              <img src="assets/huce-logo.png" alt="HUCE Logo" style="width:52px;height:52px">
+            </div>
+            <h2>ĐĂNG NHẬP ÔN TẬP</h2>
+            <p>Hệ thống kiểm tra & luyện tập Đồ án Nền móng</p>
+          </div>
+          <form class="login-body" onsubmit="return handleLogin(event)">
+            <div class="form-group">
+              <label class="form-label" for="login-name">Họ và tên sinh viên</label>
+              <input type="text" id="login-name" class="form-control" placeholder="VD: Nguyễn Văn An" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-mssv">Mã số sinh viên (MSSV)</label>
+              <input type="text" id="login-mssv" class="form-control font-mono" placeholder="VD: 661234" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-class">Lớp học phần / Chuyên ngành</label>
+              <select id="login-class" class="form-select" required>
+                <option value="">-- Đang tải danh sách lớp... --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-sode">Số đề đồ án / STT (Tùy chọn)</label>
+              <input type="text" id="login-sode" class="form-control font-mono" placeholder="VD: Đề 07 hoặc STT 15">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" style="padding:12px;margin-top:16px">
+              🚀 Vào Bảng Điều Khiển Ôn Tập
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. DASHBOARD SCREEN -->
+    <section id="dashboard-section" class="hidden">
+
+      <!-- Student Infobar -->
+      <div class="user-infobar">
+        <div class="user-info-left">
+          <div class="user-avatar" id="dash-user-avatar">SV</div>
+          <div>
+            <div class="user-name" id="dash-user-name">Sinh viên</div>
+            <div class="user-meta" id="dash-user-meta">MSSV: — · Lớp: —</div>
+          </div>
+        </div>
+        <div>
+          <span class="badge badge-warning" style="font-size:12px;padding:5px 12px">
+            Ngưỡng đạt bảo vệ: ≥ 80 điểm
+          </span>
+        </div>
+      </div>
+
+      <!-- Hero Banner -->
+      <div class="dashboard-hero">
+        <div class="hero-content">
+          <span class="hero-tag">ĐỒ ÁN NỀN MÓNG · CLO1 – CLO4</span>
+          <h1 class="hero-title">Luyện tập tình huống bảo vệ đồ án</h1>
+          <p class="hero-desc">
+            Hệ thống bài tập trắc nghiệm và câu hỏi phân tích CLO bám sát quy trình thiết kế nền móng thực tế. Sinh viên cần đạt từ <b>80/100 điểm</b> mỗi module để đủ điều kiện bảo vệ.
+          </p>
+
+          <div class="hero-stats-row">
+            <div class="hero-stat-card">
+              <div class="hero-stat-num" id="stat-modules-passed">0/6</div>
+              <div class="hero-stat-label">Module Đạt Chuẩn</div>
+            </div>
+            <div class="hero-stat-card">
+              <div class="hero-stat-num" id="stat-avg-score">—</div>
+              <div class="hero-stat-label">Điểm Trung Bình</div>
+            </div>
+            <div class="hero-stat-card">
+              <div class="hero-stat-num" id="stat-questions-count">0</div>
+              <div class="hero-stat-label">Bài Đã Hoàn Thành</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 Modules Grid -->
+      <h2 class="module-grid-title">📚 Danh Sách 6 Module Học Phần</h2>
+      <div class="module-grid" id="modules-grid-container">
+        <!-- Module cards render dynamically from app.js -->
+      </div>
+
+      <a class="card" href="cauhoi_sv.html" style="display:block;text-decoration:none;color:inherit;margin-bottom:16px">
+        <div class="card-title">🧠 Ngân hàng câu hỏi chọn đáp án (CLO1–3)</div>
+        <p class="text-muted" style="margin-top:4px">Câu hỏi tình huống theo chủ đề; chọn CLO, chủ đề, số câu. Có điểm theo chủ đề để biết chỗ còn yếu.</p>
+      </a>
+
+      <!-- Recent History Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Lịch Sử Luyện Tập Gần Đây</div>
+          <button class="btn btn-outline btn-sm" onclick="if(confirm('Xóa toàn bộ lịch sử luyện tập trên máy này?')) { resetAllProgress(); initApp(); }">
+            🔄 Làm lại từ đầu
+          </button>
+        </div>
+        <div id="recent-history-container">
+          <!-- History rendered dynamically -->
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- JS Dependencies -->
+  <script src="config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/submit.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
