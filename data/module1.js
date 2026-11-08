@@ -162,7 +162,7 @@ window.MODULE1_DATA = [
     module: 1,
     dang: "T-X-T-T",
     buoc: 1,
-    title: "Bài 6 – Lớp 2 dẻo mềm xen kẹp (Dạng T-X-T-T)",
+    title: "Bài 6 – Lớp 2 dẻo chảy xen kẹp (Dạng T-X-T-T)",
     layers: [
       { so: 1, ten: "Sét", day: 5.0, chiTieu: { w: 28, wL: 52, wP: 26 } },
       { so: 2, ten: "Sét pha", day: 4.5, chiTieu: { w: 30, wL: 38, wP: 20 } },
@@ -172,18 +172,18 @@ window.MODULE1_DATA = [
     taiTrong: { nho: 430, trungBinh: 1700, lon: 4200 },
     answer: {
       step1: ["Sét", "Sét pha", "Cát hạt vừa", "Cát hạt trung"],
-      states: ["Nửa cứng", "Dẻo mềm", "Chặt", "Chặt"],
+      states: ["Nửa cứng", "Dẻo chảy", "Chặt", "Chặt"],
       good: [true, false, true, true],
       pattern: "T-X-T-T",
       solutions: { nho: 0, trungBinh: 0, lon: 2 },
       explanation: {
         b1: [
           "A = 26% → Sét; B = (28-26)/26 = 0.08 → Nửa cứng ✅",
-          "A = 18% → Sét pha; B = (30-20)/18 = 0.56 > 0.5 → Dẻo mềm / dẻo chảy ❌",
+          "A = 18% → Sét pha; B = (30-20)/18 = 0.56 > 0.5 → Dẻo chảy (Yếu) ❌",
           "qc = 12 MPa ∈ [12, 20) → Chặt ✅",
           "NSPT = 48 ∈ [30, 50) → Chặt ✅"
         ],
-        b4: "L1 nửa cứng phù hợp móng nông cho tải nhỏ/TB. L2 dẻo mềm gây lún lớn → tải lớn 4200 kN: cọc xuyên qua L2 vào L3-L4."
+        b4: "L1 nửa cứng phù hợp móng nông cho tải nhỏ/TB. L2 dẻo chảy gây lún lớn → tải lớn 4200 kN: cọc xuyên qua L2 vào L3-L4."
       }
     }
   },
@@ -466,9 +466,9 @@ window.MODULE1_DATA = [
   {
     id: "M1_B19",
     module: 1,
-    dang: "X-X-T-T",
+    dang: "X-T-T-T",
     buoc: 2,
-    title: "Bài 19 – CLO: Thay đổi giải pháp móng khi thay đổi công năng (X-X-T-T)",
+    title: "Bài 19 – CLO: Thay đổi giải pháp móng khi thay đổi công năng (X-T-T-T)",
     layers: [
       { so: 1, ten: "Sét pha", day: 4.0, chiTieu: { w: 37, wL: 43, wP: 22 } },
       { so: 2, ten: "Sét", day: 6.0, chiTieu: { w: 29, wL: 50, wP: 26 } },

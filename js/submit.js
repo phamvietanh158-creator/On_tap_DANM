@@ -62,7 +62,8 @@ async function submitScoreToServer(scoreData) {
       return {
         success: true,
         offline: false,
-        message: '✅ Điểm đã được ghi nhận thành công vào bảng điểm của GV!'
+        message: '✅ Điểm đã được ghi nhận thành công vào bảng điểm của GV!',
+        server: (data.steps ? { steps: data.steps, score100: data.score100 } : null)
       };
     } else {
       throw new Error(data.error || 'Server error');

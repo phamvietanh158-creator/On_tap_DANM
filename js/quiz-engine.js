@@ -10,6 +10,7 @@ let stepDoneState = [false, false, false, false];
 let step1Detail = null;
 let step2Detail = null;
 let isGradingCompleted = false;
+let m1Inputs = { s1: [], s2: [], s3: '', s4: null };   // bài làm thô gửi máy chủ chấm lại
 
 // ── SOIL PATTERNS & COLORS ──
 function getSoilPattern(soilName) {
@@ -131,6 +132,7 @@ function initQuiz(question) {
   currentStepIndex = 1;
   stepScoreState = { s1: 0, s2: 0, s3: 0, s4: 0 };
   stepDoneState = [false, false, false, false];
+  m1Inputs = { s1: [], s2: [], s3: '', s4: null };
   step1Detail = null;
   step2Detail = null;
   isGradingCompleted = false;
@@ -270,6 +272,7 @@ function handleCheckStep1() {
     return;
   }
 
+  m1Inputs.s1 = userInputs;
   const maxScore = (q.buoc === 2) ? 20 : 30;
   step1Detail = gradeStep1(q.layers, userInputs, maxScore);
   stepScoreState.s1 = step1Detail.score;
@@ -368,6 +371,7 @@ function handleCheckStep2() {
     return;
   }
 
+  m1Inputs.s2 = userInputs;
   step2Detail = gradeStep2(q.layers, userInputs, 10);
   stepScoreState.s2 = step2Detail.score;
   stepDoneState[1] = true;
@@ -432,6 +436,7 @@ function handleCheckStep3() {
     return;
   }
 
+  m1Inputs.s3 = sel.value;
   const res = gradeStep3(q.dang || q.answer.pattern, sel.value, 10);
   stepScoreState.s3 = res.score;
   stepDoneState[2] = true;
@@ -511,6 +516,7 @@ function handleCheckStep4Thuan() {
     return;
   }
 
+  m1Inputs.s4 = { nho: optNho, trungBinh: optTb, lon: optLon };
   const expSols = q.answer.solutions || { nho: 0, trungBinh: 0, lon: 0 };
   const res = gradeStep4Thuan(expSols, { nho: optNho, trungBinh: optTb, lon: optLon }, 50);
   stepScoreState.s4 = res.score;
@@ -543,16 +549,12 @@ function renderStep4CLOForm(question) {
   if (!formArea) return;
 
   const clo = question.cloQuestion || { context: '', subQuestions: [] };
-
-  let subsHtml = '';
-  (clo.subQuestions || []).forEach(sub => {
-    subsHtml += `
+  const mcq = (window.M1_CLO || {})[question.id] || [];
+  const mcqHtml = mcq.map((x, i) => `
       <div class="sub-question-card">
-        <label class="sub-q-label">${sub.label}</label>
-        <textarea class="form-textarea" id="clo-ans-${sub.id}" placeholder="${sub.placeholder || 'Nhập phân tích kỹ thuật của bạn...'}" rows="3"></textarea>
-      </div>
-    `;
-  });
+        <label class="sub-q-label">Câu ${i + 1}. ${x.q}</label>
+        ${x.o.map((t, k) => `<label style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;cursor:pointer"><input type="radio" name="clo-mcq-${i}" value="${k}" style="margin-top:4px"> <span>${t}</span></label>`).join('')}
+      </div>`).join('');
 
   formArea.innerHTML = `
     <div class="clo-question-box">
@@ -560,70 +562,47 @@ function renderStep4CLOForm(question) {
       ${clo.context}
     </div>
 
-    ${subsHtml}
-
-    <div class="rubric-card">
-      <div class="rubric-title">📊 Rubric tự đánh giá & chấm điểm của Giảng viên (60đ):</div>
-      <table class="rubric-table">
-        <thead>
-          <tr>
-            <th>Mức độ</th>
-            <th>Tiêu chí đánh giá</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${(question.answer.rubric || []).map(r => `
-            <tr>
-              <td><b>${r.level}</b></td>
-              <td>${r.desc}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
+    ${mcqHtml}
 
     <div class="alert alert-info hidden" id="step4-feedback"></div>
     <button class="btn btn-primary btn-block" id="btn-check-step4" style="margin-top:14px" onclick="handleCheckStep4CLO()">
-      🏁 Nộp bài phân tích CLO (60đ)
+      🏁 Nộp bài phân tích CLO (60đ, mỗi câu 15đ)
     </button>
   `;
 }
 
 function handleCheckStep4CLO() {
   const q = currentQuestion;
-  const clo = q.cloQuestion || { subQuestions: [] };
-  const userAnswers = {};
+  const mcq = (window.M1_CLO || {})[q.id] || [];
+  const picked = [];
   let isMissing = false;
-
-  (clo.subQuestions || []).forEach(sub => {
-    const val = (document.getElementById(`clo-ans-${sub.id}`).value || '').trim();
-    if (!val) isMissing = true;
-    userAnswers[sub.id] = val;
+  mcq.forEach((x, i) => {
+    const r = document.querySelector(`input[name="clo-mcq-${i}"]:checked`);
+    if (!r) isMissing = true;
+    picked.push(r ? parseInt(r.value) : -1);
   });
-
   if (isMissing) {
-    showToast('⚠️ Vui lòng trả lời đầy đủ các câu hỏi phân tích trước khi nộp!');
+    showToast('⚠️ Vui lòng trả lời đủ các câu trắc nghiệm trước khi nộp!');
     return;
   }
-
-  // Chấm điểm cơ bản dựa trên mức độ hoàn thiện câu trả lời (Self-assessment / default exemplary)
-  const defaultCloScore = 52; // Mức Đạt yêu cầu cao (Sufficient)
-  stepScoreState.s4 = defaultCloScore;
+  m1Inputs.s4 = picked;
+  const ok = mcq.filter((x, i) => picked[i] === x.a).length;
+  stepScoreState.s4 = mcq.length ? Math.round(60 * ok / mcq.length * 10) / 10 : 0;
   stepDoneState[3] = true;
 
-  (clo.subQuestions || []).forEach(sub => {
-    document.getElementById(`clo-ans-${sub.id}`).disabled = true;
-  });
+  mcq.forEach((x, i) => document.querySelectorAll(`input[name="clo-mcq-${i}"]`).forEach(r => r.disabled = true));
 
   const fb = document.getElementById('step4-feedback');
   if (fb) {
     fb.className = 'alert alert-info';
     fb.classList.remove('hidden');
     fb.innerHTML = `
-      <b>✅ Đã ghi nhận bài phân tích CLO:</b><br>
-      📖 <b>Lời giải mẫu của Giảng viên:</b><br>
-      • <b>Câu a:</b> ${q.answer.modelAnalysis ? q.answer.modelAnalysis.a : ''}<br>
-      • <b>Câu b:</b> ${q.answer.modelAnalysis ? q.answer.modelAnalysis.b : ''}
+      <b>Kết quả Bước 4:</b> ${stepScoreState.s4}/60 điểm (${ok}/${mcq.length} câu đúng)<br>
+      ${mcq.map((x, i) => `• Câu ${i + 1}: ${picked[i] === x.a ? '✅ Đúng' : '❌ Sai'} — đáp án: ${x.o[x.a]}`).join('<br>')}
+      <hr style="margin:8px 0;border:0;border-top:1px solid #BBDEFB">
+      📖 <b>Lời giải mẫu:</b><br>
+      • ${q.answer.modelAnalysis ? q.answer.modelAnalysis.a : ''}<br>
+      • ${q.answer.modelAnalysis ? q.answer.modelAnalysis.b : ''}
     `;
   }
 
@@ -642,10 +621,12 @@ function finishQuiz() {
   const payload = {
     module: q.module || 1,
     baiId: q.id,
-    dang: q.dang,
+    dang: 'grade_m1',
     buoc: q.buoc,
     score: totalScore,
     detail: {
+      qId: q.id,
+      inputs: m1Inputs,
       step1: stepScoreState.s1,
       step2: stepScoreState.s2,
       step3: stepScoreState.s3,
@@ -654,8 +635,16 @@ function finishQuiz() {
     }
   };
 
+  let shown = false;
+  const showOnce = (sc, pass) => { if (shown) return; shown = true; showResultModal(sc, pass); };
   submitScoreToServer(payload).then(res => {
     showToast(res.message, 4000);
+    if (res.server && res.server.steps) {                      // điểm chính thức do máy chủ tính
+      stepScoreState = Object.assign({}, res.server.steps);
+      const t = res.server.score100;
+      saveScoreLocally(q.module || 1, q.id, t, { official: true });
+      showOnce(t, t >= passThreshold);
+    }
   });
 
   const checkBtn = document.getElementById('btn-check-step4');
@@ -666,8 +655,8 @@ function finishQuiz() {
   }
 
   setTimeout(() => {
-    showResultModal(totalScore, isPass);
-  }, 1200);
+    showOnce(totalScore, isPass);                              // offline hoặc máy chủ chậm: hiện điểm tạm tính ở trình duyệt
+  }, 4000);
 }
 
 function showResultModal(totalScore, isPass) {
