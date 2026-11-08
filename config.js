@@ -12,7 +12,7 @@ window.APP_CONFIG = {
   APP_SUBTITLE: "Hệ thống Ôn tập & Kiểm tra Đồ án Nền móng Online",
 
   // Cloudflare Worker URL (nhận điểm -> Google Sheets của GV)
-  WORKER_URL: "https://nen-mong.workers.dev/submit", // Cập nhật URL Worker thực tế khi deploy
+  WORKER_URL: "https://danm.phamvietanh158.workers.dev/", // Cập nhật URL Worker thực tế khi deploy
 
   // Ngưỡng điểm ĐẠT theo quy định của bộ môn để được bảo vệ đồ án
   PASS_SCORE: 80, // 80/100 điểm
