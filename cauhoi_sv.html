@@ -27,7 +27,7 @@
   <div class="card">
     <label>CLO <select id="fClo"><option value="">Tất cả</option><option value="1">CLO1 – phương án móng</option><option value="2">CLO2 – móng nông</option><option value="3">CLO3 – móng cọc</option></select></label>
     <label>Chủ đề <select id="fTp"></select></label>
-    <label>Số câu <select id="fN"><option>10</option><option selected>20</option><option>30</option><option>40</option></select></label>
+    <label>Số câu (tối thiểu 20 để tính điểm bảo vệ) <select id="fN"><option selected>20</option><option>30</option><option>40</option></select></label>
     <label>Mã đề (hạt giống) <input id="seed" type="text" style="width:6em"></label>
     <button id="start">Bắt đầu</button>
     <div id="idBox" style="margin-top:6px"><label>MSSV <input id="maSV" type="text" style="width:8em"></label>
@@ -103,6 +103,7 @@
     var cfg = window.APP_CONFIG||{}, url = cfg.WORKER_URL;
     if(!url || /REPLACE_WITH/.test(url)){ $('out').innerHTML='<p class="no">Chưa cấu hình WORKER_URL trong config.js.</p>'; return; }
     var sv = {maSV:$('maSV').value.trim(), hoTen:$('hoTen').value.trim(), lop:$('lop').value.trim()};
+    if(cur.length<20){ $('out').innerHTML='<p class="no">Cần tối thiểu 20 câu mỗi lần nộp (hiện '+cur.length+'). Chọn "Tất cả chủ đề" hoặc tăng số câu.</p>'; return; }
     if(!sv.maSV||!sv.hoTen||!sv.lop){ $('out').innerHTML='<p class="no">Nhập MSSV, họ tên, lớp trước khi nộp.</p>'; return; }
     $('out').innerHTML='<p class="hint">Đang chấm…</p>';
     fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
