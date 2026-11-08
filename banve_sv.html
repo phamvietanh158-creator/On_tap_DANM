@@ -83,6 +83,7 @@
     $('out').innerHTML = '<div class="box"><b>Kết quả đọc bản vẽ: '+s+' / '+res.n+' ('+Math.round(res.mean*100)+'%)</b></div>';
     $('submit').style.display='none';
   }
+  function okBanner(g){ var t = (g.score100!==undefined?g.score100:(g.score!==undefined?g.score:null)); $('out').innerHTML = '<div class="box pass"><b>✅ Đã nộp bài thành công.</b> Kết quả đã được ghi vào bảng điểm của giảng viên'+(t!==null?' (điểm ghi nhận: <b>'+t+'/100</b>)':'')+'.</div>' + $('out').innerHTML; try{ if(typeof showToast==='function') showToast('✅ Đã nộp bài thành công!', 4000); }catch(e){} }
   function submit(){
     var a = answers();
     if(Q.TPL[0].truth){ show(WF.grade(Q.TPL, p, a, p)); return; }      // bản thử: chấm tại trang
@@ -90,12 +91,12 @@
     if(!url || /REPLACE_WITH/.test(url)){ $('out').innerHTML='<p class="no">Chưa cấu hình WORKER_URL trong config.js.</p>'; return; }
     var sv = {maSV:$('maSV').value.trim(), hoTen:$('hoTen').value.trim(), lop:$('lop').value.trim()};
     if(!sv.maSV||!sv.hoTen||!sv.lop){ $('out').innerHTML='<p class="no">Nhập MSSV, họ tên, lớp trước khi nộp.</p>'; return; }
-    $('out').innerHTML='<p class="hint">Đang chấm…</p>';
+    $('out').innerHTML='<p class="hint">⏳ Đang nộp và chấm bài, vui lòng chờ…</p>';
     fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       maSV:sv.maSV,hoTen:sv.hoTen,lop:sv.lop,soDe:seed,module:6,baiId:'M6-'+seed,dang:'grade_m6',buoc:1,score:0,detail:{seed:seed,answers:a}})})
     .then(function(r){return r.json();}).then(function(g){
       if(!g.ok){ $('out').innerHTML='<p class="no">Lỗi: '+(g.error||'không rõ')+'</p>'; return; }
-      show(g);
+      show(g); okBanner(g);
     }).catch(function(e){ $('out').innerHTML='<p class="no">Không gửi được: '+e.message+'</p>'; });
   }
   $('start').onclick = start; $('submit').onclick = submit;

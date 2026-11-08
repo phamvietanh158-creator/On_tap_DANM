@@ -97,6 +97,7 @@
     $('out').innerHTML = '<div class="box"><b>Kết quả: '+f(res.sum,1)+' / '+res.n+' điểm ('+Math.round(res.mean*100)+'%)</b></div><h2>Theo chủ đề</h2><table><tr><th>Chủ đề</th><th>Điểm</th><th></th></tr>'+rows+'</table><p class="hint">Chủ đề dưới 60% nên ôn lại. Đổi "Mã đề" để làm bộ câu khác.</p>';
     $('submit').style.display = 'none';
   }
+  function okBanner(g){ var t = (g.score100!==undefined?g.score100:(g.score!==undefined?g.score:null)); $('out').innerHTML = '<div class="box pass"><b>✅ Đã nộp bài thành công.</b> Kết quả đã được ghi vào bảng điểm của giảng viên'+(t!==null?' (điểm ghi nhận: <b>'+t+'/100</b>)':'')+'.</div>' + $('out').innerHTML; try{ if(typeof showToast==='function') showToast('✅ Đã nộp bài thành công!', 4000); }catch(e){} }
   function submit(){
     var ans = picks(), ids = cur.map(function(q){return q.id;});
     if(FULL){ show(QB.grade(FULL, ids, ans)); return; }              // bản thử: chấm tại trang
@@ -105,12 +106,12 @@
     var sv = {maSV:$('maSV').value.trim(), hoTen:$('hoTen').value.trim(), lop:$('lop').value.trim()};
     if(cur.length<20){ $('out').innerHTML='<p class="no">Cần tối thiểu 20 câu mỗi lần nộp (hiện '+cur.length+'). Chọn "Tất cả chủ đề" hoặc tăng số câu.</p>'; return; }
     if(!sv.maSV||!sv.hoTen||!sv.lop){ $('out').innerHTML='<p class="no">Nhập MSSV, họ tên, lớp trước khi nộp.</p>'; return; }
-    $('out').innerHTML='<p class="hint">Đang chấm…</p>';
+    $('out').innerHTML='<p class="hint">⏳ Đang nộp và chấm bài, vui lòng chờ…</p>';
     fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       maSV:sv.maSV,hoTen:sv.hoTen,lop:sv.lop,soDe:seed,module:7,baiId:'NH-'+seed,dang:'grade_bank',buoc:1,score:0,detail:{ids:ids,answers:ans}})})
     .then(function(r){return r.json();}).then(function(g){
       if(!g.ok){ $('out').innerHTML='<p class="no">Lỗi: '+(g.error||'không rõ')+'</p>'; return; }
-      show({n:g.n, sum:g.mean*g.n, mean:g.mean, items:g.items, topic:g.topic});
+      show({n:g.n, sum:g.mean*g.n, mean:g.mean, items:g.items, topic:g.topic}); okBanner({score:Math.round(g.mean*100)});
     }).catch(function(e){ $('out').innerHTML='<p class="no">Không gửi được: '+e.message+'</p>'; });
   }
   $('start').onclick = start; $('submit').onclick = function(){ submit(); };

@@ -204,6 +204,7 @@
     return {calc:calc, verdict:verdict, overall:$('overall').value, ans:ans, wi:{answers: wiAnswers()}};
   }
 
+  function okBanner(g){ var t = (g.score100!==undefined?g.score100:(g.score!==undefined?g.score:null)); $('out').innerHTML = '<div class="box pass"><b>✅ Đã nộp bài thành công.</b> Kết quả đã được ghi vào bảng điểm của giảng viên'+(t!==null?' (điểm ghi nhận: <b>'+t+'/100</b>)':'')+'.</div>' + $('out').innerHTML; try{ if(typeof showToast==='function') showToast('✅ Đã nộp bài thành công!', 4000); }catch(e){} }
   function submit(){
     var d = collect();
     if(SETS.some(function(k){return !d.ans[k][0]||!d.ans[k][1];})){ $('out').innerHTML = '<p class="no">Hãy chọn đủ cột A và cột B cho cả ba câu nối ở mục 5.</p>'; return; }
@@ -219,14 +220,14 @@
     if(!url || /REPLACE_WITH/.test(url)){ $('out').innerHTML='<p class="no">Chưa cấu hình WORKER_URL trong config.js.</p>'; return; }
     var sv = {maSV:$('maSV').value.trim(), hoTen:$('hoTen').value.trim(), lop:$('lop').value.trim()};
     if(!sv.maSV||!sv.hoTen||!sv.lop){ $('out').innerHTML='<p class="no">Nhập MSSV, họ tên, lớp trước khi nộp.</p>'; return; }
-    $('out').innerHTML='<p class="hint">Đang chấm…</p>';
+    $('out').innerHTML='<p class="hint">⏳ Đang nộp và chấm bài, vui lòng chờ…</p>';
     fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       maSV:sv.maSV,hoTen:sv.hoTen,lop:sv.lop,soDe:cur[0],module:2,baiId:'M2-'+cur[0],dang:'grade_m2',buoc:1,score:0,
       detail:{soDe:cur[0],attempt:att,calc:d.calc,verdict:d.verdict,overall:d.overall,ans:d.ans,wi:d.wi}})})
     .then(function(r){return r.json();}).then(function(g){
       if(!g.ok){ $('out').innerHTML='<p class="no">Lỗi: '+(g.error||'không rõ')+'</p>'; return; }
       g.score100 = g.score100 !== undefined ? g.score100 : g.score;
-      show(g);
+      show(g); okBanner(g);
     }).catch(function(e){ $('out').innerHTML='<p class="no">Không gửi được: '+e.message+'</p>'; });
   }
   C.FIELDS.forEach(function(x){ $('c_'+x.key).onchange = svg; });
