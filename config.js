@@ -16,6 +16,9 @@ window.APP_CONFIG = {
 
   // Ngưỡng điểm ĐẠT theo quy định của bộ môn để được bảo vệ đồ án
   PASS_SCORE: 80, // 80/100 điểm
+  // Module 1: cần ít nhất M1_MIN_BAI bài KHÁC NHAU đạt ≥ PASS_SCORE; bài có gợi ý (liệt kê id ở M1_BAI_GOI_Y) không được tính. Hiện M1 chưa có chế độ gợi ý.
+  M1_MIN_BAI: 5,
+  M1_BAI_GOI_Y: [],
   // Tỷ trọng các phần khi tổng hợp điểm môn [GĐ: tác giả chỉnh]. CLO4 (đọc bản vẽ) tỷ trọng thấp. Tổng = 100.
   MODULE_WEIGHTS: { M1: 20, M2: 35, M4: 35, M6: 5, NGAN_HANG: 5 },
 

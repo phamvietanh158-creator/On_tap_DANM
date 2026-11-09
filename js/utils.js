@@ -61,7 +61,11 @@ function getModuleStats(moduleId) {
   const avgScore = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
   const maxScore = scores.length ? Math.max(...scores) : 0;
   const passThreshold = (window.APP_CONFIG && window.APP_CONFIG.PASS_SCORE) || 80;
-  const isPassed = scores.some(s => s >= passThreshold);
+  const cfg = window.APP_CONFIG || {};
+  const goiY = cfg.M1_BAI_GOI_Y || [];
+  const soBaiDat = Object.keys(modData.bestScores || {}).filter(id => modData.bestScores[id] >= passThreshold && !(moduleId === 1 && goiY.includes(id))).length;
+  const minBai = moduleId === 1 ? (cfg.M1_MIN_BAI || 5) : 1;
+  const isPassed = soBaiDat >= minBai;      // M1: đủ số bài đạt; các phần khác: một bài/lần nộp đạt
 
   return {
     completedCount: modData.completed.length,
@@ -69,6 +73,8 @@ function getModuleStats(moduleId) {
     bestScores: modData.bestScores,
     avgScore,
     maxScore,
+    soBaiDat,
+    minBai,
     isPassed,
     lastPlayed: modData.lastPlayed
   };

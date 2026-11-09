@@ -66,6 +66,9 @@ async function submitScoreToServer(scoreData) {
         server: (data.steps ? { steps: data.steps, score100: data.score100 } : null)
       };
     } else {
+      if (data.error && /danh sách/.test(data.error)) {          // lỗi nghiệp vụ (MSSV không có trong danh sách): báo thẳng, không đưa vào hàng đợi
+        return { success: false, offline: false, message: '❌ ' + data.error };
+      }
       throw new Error(data.error || 'Server error');
     }
   } catch (err) {

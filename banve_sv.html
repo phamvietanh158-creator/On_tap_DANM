@@ -4,22 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CLO4 – Đọc hiểu bản vẽ móng</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/sv.css">
 <style>
-  body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6f8;color:#1b2430;line-height:1.55}
-  main{max-width:900px;margin:0 auto;padding:12px}
-  .card{background:#fff;border-radius:10px;padding:14px;margin:12px 0;box-shadow:0 1px 3px #0002}
-  h1{font-size:1.2rem} h2{font-size:1.05rem;margin:.6em 0 .3em} h3{font-size:1rem;margin:.8em 0 .2em}
-  label{display:inline-block;margin:4px 10px 4px 0} input[type=number],input[type=text]{padding:6px;font-size:1rem}
-  button{padding:9px 16px;font-size:1rem;border:0;border-radius:8px;background:#1f6feb;color:#fff;cursor:pointer}
-  .opt{display:block;padding:5px 8px;margin:3px 0;border-radius:6px;cursor:pointer} .opt:hover{background:#f0f4fa} .opt input{margin-right:8px}
-  .ok{color:#127a3d;font-weight:600} .no{color:#b42318;font-weight:600} .hint{color:#5b6773;font-size:.9rem}
-  .box{background:#eef4ff;border-left:4px solid #1f6feb;padding:8px 10px;border-radius:6px;margin:8px 0}
-  .right{background:#e7f6ec} .wrong{background:#fdecea}
+  .opt{display:flex;align-items:flex-start;gap:8px;padding:7px 9px;margin:4px 0;border-radius:8px;border:1px solid transparent;cursor:pointer} .opt:hover{background:var(--primary-light)}
+  .opt input{margin-top:4px;flex:none} .opt:has(input:checked){background:var(--primary-light);border-color:#9fc2ff}
+  .q{background:#fbfcfe;border:1px solid var(--border-light);border-radius:12px;padding:10px 12px;margin:10px 0}
+  .tag{display:inline-block;font-size:.78rem;background:var(--primary-light);color:var(--primary-dark);border-radius:10px;padding:1px 8px;margin-right:6px}
+  .right{background:var(--success-light)} .wrong{background:var(--danger-light)}
 </style>
 </head>
 <body>
-<main>
-  <h1>CLO4 – Đọc hiểu bản vẽ móng</h1>
+<header class="app-header"><div class="container header-inner"><a href="index.html" class="brand-group"><div class="brand-logo"><img src="assets/huce-logo.png" alt="HUCE"></div><div class="brand-titles"><span class="brand-title">ĐẠI HỌC XÂY DỰNG HÀ NỘI</span><span class="brand-sub">Bộ môn Cơ học đất – Nền móng · NenMong Quiz</span></div></a><div class="header-actions"><a class="btn btn-ghost-white btn-sm" href="index.html">← Bảng điều khiển</a></div></div></header>
+<main class="container">
+  <div class="pagetitle"><h1>CLO4 – Đọc hiểu bản vẽ móng</h1></div>
+  <div class="how"><b>Cách làm bài</b><p style="margin-top:4px">Mỗi sinh viên có bản vẽ riêng theo số đề. Quan sát kỹ bản vẽ (chú thích số, kích thước, ký hiệu thép, tỉ lệ) rồi chọn đáp án cho từng câu, sau đó bấm <b>Nộp bài</b>. Từ <b>80/100</b> là đạt; chưa đạt thì làm lại. Phần này có tỷ trọng nhỏ.</p></div>
   <div class="card">
     <label>Số đề của bạn <input id="seed" type="number" min="1" value="1" style="width:6em"></label>
     <button id="start">Xem bản vẽ</button>
@@ -103,6 +102,13 @@
     }).catch(function(e){ $('out').innerHTML='<p class="no">Không gửi được: '+e.message+'</p>'; });
   }
   $('start').onclick = start; $('submit').onclick = submit;
+  var ST = (typeof getStudent === 'function') ? getStudent() : null;
+  if(ST){ $('maSV').value = ST.maSV||''; $('hoTen').value = ST.hoTen||''; $('lop').value = ST.lop||'';
+    var nt = document.createElement('p'); nt.className = 'hint'; nt.textContent = 'Đang làm bài với tư cách ' + (ST.hoTen||'') + ' · MSSV ' + (ST.maSV||'') + ' · lớp ' + (ST.lop||'') + '.';
+    $('idBox').parentNode.insertBefore(nt, $('idBox')); $('idBox').style.display = 'none';
+    var dm = String(ST.soDe||'').match(/(\d+)/);
+    if(dm && $('seed').type === 'number'){ $('seed').value = dm[1]; $('seed').parentNode.style.display = 'none'; $('start').onclick(); $('start').style.display = 'none'; }
+  }
 })();
 </script>
 </body>

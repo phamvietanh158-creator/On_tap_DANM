@@ -128,7 +128,7 @@ function renderDashboard(student) {
     const thieu = partStats.filter(st => !st.isPassed);
     defEl.className = 'alert ' + (thieu.length ? 'alert-warning' : 'alert-success');
     defEl.innerHTML = thieu.length
-      ? '<b>Chưa đủ điều kiện bảo vệ.</b> Cần đạt ≥ ' + ((config.PASS_SCORE) || 80) + ' điểm ở cả ' + PARTS.length + ' phần. Còn thiếu: ' + thieu.map(st => st.ten + (st.maxScore ? ' (cao nhất ' + st.maxScore + 'đ)' : ' (chưa làm)')).join('; ') + '.'
+      ? '<b>Chưa đủ điều kiện bảo vệ.</b> Cần đạt ≥ ' + ((config.PASS_SCORE) || 80) + ' điểm ở cả ' + PARTS.length + ' phần. Còn thiếu: ' + thieu.map(st => st.ten + (st.id === 1 ? ' (mới ' + st.soBaiDat + '/' + st.minBai + ' bài ≥ 80)' : (st.maxScore ? ' (cao nhất ' + st.maxScore + 'đ)' : ' (chưa làm)'))).join('; ') + '.'
       : '<b>🎉 Đã đủ điều kiện bảo vệ</b> (cả ' + PARTS.length + ' phần đều ≥ ' + ((config.PASS_SCORE) || 80) + ' điểm trên máy này). Giảng viên xác nhận theo bảng điểm chính thức.';
   }
   const bankEl = document.getElementById('bank-status');
@@ -147,10 +147,10 @@ function renderDashboard(student) {
     // M1 làm đủ bộ 15 bài; M2–M6 mỗi sinh viên chỉ có 1 đề theo số đề, nên % tính theo điểm cao nhất so với ngưỡng đạt.
     const passScore = (config.PASS_SCORE || 80);
     const pct = mod.id === 1
-      ? Math.min(100, Math.round((stats.completedCount / mod.totalQuestions) * 100))
+      ? Math.min(100, Math.round((stats.soBaiDat / stats.minBai) * 100))
       : (stats.isPassed ? 100 : (stats.completedCount > 0 ? Math.min(99, Math.round((stats.maxScore / passScore) * 100)) : 0));
     const progressLabel = mod.id === 1
-      ? `Tiến độ: ${stats.completedCount}/${mod.totalQuestions} bài`
+      ? `Đạt ${stats.soBaiDat}/${stats.minBai} bài ≥ ${passScore}đ (đã làm ${stats.completedCount}/${mod.totalQuestions} bài)`
       : (stats.isPassed ? 'Đã đạt chuẩn' : (stats.completedCount > 0 ? `Điểm cao nhất ${stats.maxScore}/${passScore}` : 'Chưa nộp bài'));
 
     let statusPill = '<span class="status-pill status-empty">⚪ Chưa luyện tập</span>';
