@@ -101,23 +101,41 @@ function renderDashboard(student) {
   let totalCompletedQuestions = 0;
   let allScores = [];
 
-  modules.forEach(m => {
-    const stats = getModuleStats(m.id);
-    if (stats.isPassed) totalPassed++;
-    totalCompletedQuestions += stats.completedCount;
-    allScores = allScores.concat(Object.values(stats.bestScores || {}));
+  // 5 phần xét điều kiện bảo vệ: M1, Móng nông (M2, M3 chung trang), Móng cọc (M4, M5 chung trang), Bản vẽ (M6), Ngân hàng câu hỏi (mã 7).
+  // M3, M5 không đếm riêng để khỏi đếm trùng.
+  const PARTS = [{ id: 1, ten: 'Module 1' }, { id: 2, ten: 'Móng nông' }, { id: 4, ten: 'Móng cọc' }, { id: 6, ten: 'Bản vẽ' }, { id: 7, ten: 'Ngân hàng câu hỏi' }];
+  const partStats = PARTS.map(p => Object.assign({ ten: p.ten, id: p.id }, getModuleStats(p.id)));
+  partStats.forEach(st => {
+    if (st.isPassed) totalPassed++;
+    totalCompletedQuestions += st.completedCount;
+    allScores = allScores.concat(Object.values(st.bestScores || {}));
   });
 
   const avgScore = allScores.length ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length) : 0;
 
   const statPassedEl = document.getElementById('stat-modules-passed');
-  if (statPassedEl) statPassedEl.textContent = `${totalPassed}/6`;
+  if (statPassedEl) statPassedEl.textContent = `${totalPassed}/${PARTS.length}`;
 
   const statAvgEl = document.getElementById('stat-avg-score');
   if (statAvgEl) statAvgEl.textContent = allScores.length ? `${avgScore}đ` : '—';
 
   const statCountEl = document.getElementById('stat-questions-count');
   if (statCountEl) statCountEl.textContent = totalCompletedQuestions;
+
+  // Tình trạng điều kiện bảo vệ (theo dữ liệu trên máy này; bảng chính thức là tab TongHop trong Google Sheet)
+  const defEl = document.getElementById('defense-status');
+  if (defEl) {
+    const thieu = partStats.filter(st => !st.isPassed);
+    defEl.className = 'alert ' + (thieu.length ? 'alert-warning' : 'alert-success');
+    defEl.innerHTML = thieu.length
+      ? '<b>Chưa đủ điều kiện bảo vệ.</b> Cần đạt ≥ ' + ((config.PASS_SCORE) || 80) + ' điểm ở cả ' + PARTS.length + ' phần. Còn thiếu: ' + thieu.map(st => st.ten + (st.maxScore ? ' (cao nhất ' + st.maxScore + 'đ)' : ' (chưa làm)')).join('; ') + '.'
+      : '<b>🎉 Đã đủ điều kiện bảo vệ</b> (cả ' + PARTS.length + ' phần đều ≥ ' + ((config.PASS_SCORE) || 80) + ' điểm trên máy này). Giảng viên xác nhận theo bảng điểm chính thức.';
+  }
+  const bankEl = document.getElementById('bank-status');
+  if (bankEl) {
+    const bk = partStats[4];
+    bankEl.innerHTML = bk.isPassed ? '<span class="text-success">✅ Đã đạt chuẩn (cao nhất ' + bk.maxScore + 'đ)</span>' : (bk.maxScore ? 'Điểm cao nhất ' + bk.maxScore + 'đ / cần ≥ ' + ((config.PASS_SCORE) || 80) : 'Chưa nộp bài');
+  }
 
   // 3. Render 6 Module Cards
   const gridEl = document.getElementById('modules-grid-container');
