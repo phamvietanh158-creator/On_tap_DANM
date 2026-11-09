@@ -128,13 +128,13 @@ function renderDashboard(student) {
     const thieu = partStats.filter(st => !st.isPassed);
     defEl.className = 'alert ' + (thieu.length ? 'alert-warning' : 'alert-success');
     defEl.innerHTML = thieu.length
-      ? '<b>Chưa đủ điều kiện bảo vệ.</b> Cần đạt ≥ ' + ((config.PASS_SCORE) || 80) + ' điểm ở cả ' + PARTS.length + ' phần. Còn thiếu: ' + thieu.map(st => st.ten + (st.id === 1 ? ' (mới ' + st.soBaiDat + '/' + st.minBai + ' bài ≥ 80)' : (st.maxScore ? ' (cao nhất ' + st.maxScore + 'đ)' : ' (chưa làm)'))).join('; ') + '.'
+      ? '<b>Chưa đủ điều kiện bảo vệ.</b> Cần đạt ≥ ' + ((config.PASS_SCORE) || 80) + ' điểm ở cả ' + PARTS.length + ' phần. Còn thiếu: ' + thieu.map(st => st.ten + (st.id === 1 ? ' (mới ' + st.soBaiDat + '/' + st.minBai + ' bài ≥ 80)' : (st.completedCount ? ' (cao nhất ' + st.maxScore + 'đ)' : ' (chưa làm)'))).join('; ') + '.'
       : '<b>🎉 Đã đủ điều kiện bảo vệ</b> (cả ' + PARTS.length + ' phần đều ≥ ' + ((config.PASS_SCORE) || 80) + ' điểm trên máy này). Giảng viên xác nhận theo bảng điểm chính thức.';
   }
   const bankEl = document.getElementById('bank-status');
   if (bankEl) {
     const bk = partStats[4];
-    bankEl.innerHTML = bk.isPassed ? '<span class="text-success">✅ Đã đạt chuẩn (cao nhất ' + bk.maxScore + 'đ)</span>' : (bk.maxScore ? 'Điểm cao nhất ' + bk.maxScore + 'đ / cần ≥ ' + ((config.PASS_SCORE) || 80) : 'Chưa nộp bài');
+    bankEl.innerHTML = bk.isPassed ? '<span class="text-success">✅ Đã đạt chuẩn (cao nhất ' + bk.maxScore + 'đ)</span>' : (bk.completedCount ? 'Điểm cao nhất ' + bk.maxScore + 'đ / cần ≥ ' + ((config.PASS_SCORE) || 80) : 'Chưa nộp bài');
   }
 
   // 3. Render 6 Module Cards
