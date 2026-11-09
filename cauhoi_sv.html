@@ -44,6 +44,7 @@
 </main>
 
 <script src="config.js"></script>
+<script src="js/utils.js"></script>
 <script src="data/qbank_public.js"></script>
 <script src="js/qbank.js"></script>
 <script>
@@ -111,7 +112,7 @@
       maSV:sv.maSV,hoTen:sv.hoTen,lop:sv.lop,soDe:seed,module:7,baiId:'NH-'+seed,dang:'grade_bank',buoc:1,score:0,detail:{ids:ids,answers:ans}})})
     .then(function(r){return r.json();}).then(function(g){
       if(!g.ok){ $('out').innerHTML='<p class="no">Lỗi: '+(g.error||'không rõ')+'</p>'; return; }
-      show({n:g.n, sum:g.mean*g.n, mean:g.mean, items:g.items, topic:g.topic}); okBanner({score:Math.round(g.mean*100)});
+      try{ if(typeof saveScoreLocally==='function') saveScoreLocally(7,'NH-'+seed,Math.round(g.mean*100),{}); }catch(e){} show({n:g.n, sum:g.mean*g.n, mean:g.mean, items:g.items, topic:g.topic}); okBanner({score:Math.round(g.mean*100)});
     }).catch(function(e){ $('out').innerHTML='<p class="no">Không gửi được: '+e.message+'</p>'; });
   }
   $('start').onclick = start; $('submit').onclick = function(){ submit(); };

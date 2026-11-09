@@ -126,7 +126,14 @@ function renderDashboard(student) {
   let gridHtml = '';
   modules.forEach(mod => {
     const stats = getModuleStats(mod.id);
-    const pct = Math.min(100, Math.round((stats.completedCount / mod.totalQuestions) * 100));
+    // M1 làm đủ bộ 15 bài; M2–M6 mỗi sinh viên chỉ có 1 đề theo số đề, nên % tính theo điểm cao nhất so với ngưỡng đạt.
+    const passScore = (config.PASS_SCORE || 80);
+    const pct = mod.id === 1
+      ? Math.min(100, Math.round((stats.completedCount / mod.totalQuestions) * 100))
+      : (stats.isPassed ? 100 : (stats.completedCount > 0 ? Math.min(99, Math.round((stats.maxScore / passScore) * 100)) : 0));
+    const progressLabel = mod.id === 1
+      ? `Tiến độ: ${stats.completedCount}/${mod.totalQuestions} bài`
+      : (stats.isPassed ? 'Đã đạt chuẩn' : (stats.completedCount > 0 ? `Điểm cao nhất ${stats.maxScore}/${passScore}` : 'Chưa nộp bài'));
 
     let statusPill = '<span class="status-pill status-empty">⚪ Chưa luyện tập</span>';
     if (stats.isPassed) {
@@ -149,7 +156,7 @@ function renderDashboard(student) {
 
         <div class="module-progress-box">
           <div class="progress-meta">
-            <span>Tiến độ: ${stats.completedCount}/${mod.totalQuestions} bài</span>
+            <span>${progressLabel}</span>
             <span>${pct}%</span>
           </div>
           <div class="progress-bar-track">

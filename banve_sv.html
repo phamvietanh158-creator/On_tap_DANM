@@ -37,6 +37,7 @@
 </main>
 
 <script src="config.js"></script>
+<script src="js/utils.js"></script>
 <script src="js/whatif.js"></script>
 <script src="js/qbank.js"></script>
 <script src="js/m6-draw.js"></script>
@@ -96,6 +97,8 @@
       maSV:sv.maSV,hoTen:sv.hoTen,lop:sv.lop,soDe:seed,module:6,baiId:'M6-'+seed,dang:'grade_m6',buoc:1,score:0,detail:{seed:seed,answers:a}})})
     .then(function(r){return r.json();}).then(function(g){
       if(!g.ok){ $('out').innerHTML='<p class="no">Lỗi: '+(g.error||'không rõ')+'</p>'; return; }
+      var sc = g.score100 !== undefined ? g.score100 : g.score;
+      if(typeof saveScoreLocally === 'function' && sc !== undefined){ try{ saveScoreLocally(6, 'M6-' + seed, sc, {}); }catch(e){} }
       show(g); okBanner(g);
     }).catch(function(e){ $('out').innerHTML='<p class="no">Không gửi được: '+e.message+'</p>'; });
   }

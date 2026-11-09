@@ -45,9 +45,12 @@ function getProgress() {
   }
 }
 
+// M3 làm chung trang M2, M5 làm chung trang M4: điểm lưu ở module gốc.
+const MERGED_MODULES = { 3: 2, 5: 4 };
+
 function getModuleStats(moduleId) {
   const progress = getProgress();
-  const modData = progress[`module_${moduleId}`] || {
+  const modData = progress[`module_${MERGED_MODULES[moduleId] || moduleId}`] || {
     completed: [],
     bestScores: {},
     passed: false,
